@@ -1,0 +1,18 @@
+# Ubuntu 22.04 LXC Container Template
+arch: amd64
+ostype: ubuntu
+release: jammy
+version: 22.04
+
+# Container specifications
+cores: 2
+memory: 2048
+swap: 512
+rootfs: local-lvm:8
+hostname: ubuntu-template
+
+# Network configuration
+net0: name=eth0,bridge=vmbr0,ip=dhcp,ip6=dhcp
+
+# Features
+features: nesting=1

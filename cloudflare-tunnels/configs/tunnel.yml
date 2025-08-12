@@ -1,0 +1,10 @@
+# Cloudflare Tunnel Configuration
+tunnel: your-tunnel-id
+credentials-file: /etc/cloudflared/creds/your-tunnel.json
+
+ingress:
+  - hostname: your-domain.com
+    service: http://localhost:8080
+  - hostname: api.your-domain.com
+    service: http://localhost:3000
+  - service: http_status:404
