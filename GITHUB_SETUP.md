@@ -51,12 +51,12 @@
 
 ## Next Steps
 
-### 1. Open Projects in Cursor
+### 1. Open Repository in Cursor
 ```bash
-# Each project can now be opened as a separate workspace
-cursor proxmox-management/
-cursor lxc-templates/
-cursor cloudflare-tunnels/
+# Open the unified infrastructure workspace
+cursor infrastructure-management/
+# or
+cd infrastructure-management && cursor .
 ```
 
 ### 2. Extension Discovery
@@ -74,10 +74,9 @@ Cursor will now suggest relevant extensions as you work with:
 ## Repository URLs Summary
 ```
 Main:           https://github.com/edwardhallam/infrastructure-management
-Proxmox:        https://github.com/edwardhallam/proxmox-lxc-manager
-LXC Templates:  https://github.com/edwardhallam/lxc-container-templates
-Cloudflare:     https://github.com/edwardhallam/cloudflare-tunnel-setup
-Scripts:        https://github.com/edwardhallam/infrastructure-automation
+                (Contains all projects: Proxmox, LXC, Cloudflare, Scripts)
 ```
+
+**Note**: All projects have been consolidated into the main `infrastructure-management` repository for easier management and development.
 
 All repositories are now ready for development with proper version control and security! 🚀

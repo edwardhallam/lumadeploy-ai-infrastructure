@@ -31,13 +31,15 @@ Centralized management for Proxmox, LXC containers, and Cloudflare tunnels with 
 
 ## Getting Started
 
-### 1. Project Setup
-Each project can be opened as a separate Cursor workspace:
+### 1. Repository Setup
+This is a unified infrastructure repository containing all related projects:
 ```bash
-# Open individual projects
-cursor proxmox-management/
-cursor lxc-templates/
-cursor cloudflare-tunnels/
+# Clone the entire repository
+git clone https://github.com/edwardhallam/infrastructure-management.git
+cd infrastructure-management
+
+# Open in your preferred editor (recommended: Cursor/VS Code)
+cursor .  # Opens the entire infrastructure workspace
 ```
 
 ### 2. Development Workflow
@@ -88,7 +90,7 @@ Cursor will automatically suggest relevant extensions as you work:
 4. Use consistent naming conventions
 
 ## Support
-- Check individual project READMEs for specific setup
+- Check project-specific READMEs within this repository for detailed setup
 - Use shared scripts for common operations
 - Document any custom configurations
 - Maintain runbooks for troubleshooting
