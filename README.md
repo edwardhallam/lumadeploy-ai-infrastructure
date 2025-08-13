@@ -1,33 +1,43 @@
-# Infrastructure Ecosystem
+# AI-First Infrastructure Platform
 
-**🎯 Complete Infrastructure Management in One Repository**
+**🤖 AI Infrastructure as a Service (AI IaaS) with Complete IaC Automation**
 
-A unified infrastructure management ecosystem containing all tools, configurations, and automation for Proxmox virtualization, Cloudflare tunnels, LXC containers, and shared infrastructure utilities. This consolidated approach ensures complete context, consistent standards, and simplified maintenance.
+An enterprise-grade AI Infrastructure as a Service platform that delivers LibreChat-based AI assistants and on-demand MCP (Model Context Protocol) servers through comprehensive Infrastructure as Code (IaC). Built for developers and organizations who demand intelligent AI chat systems with Cursor integration, featuring fully automated provisioning via Terraform and Ansible on Proxmox infrastructure. This platform transforms traditional infrastructure into an AI-native, code-driven experience.
 
-## 🚀 Features
+## 🚀 Enterprise Features
 
-- **Unified Ecosystem**: All infrastructure components in one repository for complete context
-- **Proxmox Integration**: Full LXC container management with Terraform and Python tools
-- **Container Console API**: Remote container management and automation
-- **Multi-Cloud Infrastructure**: Support for various cloud and on-premises solutions
-- **Security-First**: Automated security scanning and validation across all components
-- **Infrastructure as Code**: Version-controlled infrastructure configurations
-- **Professional Tooling**: Industry-standard DevOps practices
+- **🏗️ Complete Infrastructure as Code (IaC)**: 100% Terraform + Ansible automation for reproducible, version-controlled deployments
+- **☁️ AI Infrastructure as a Service (AI IaaS)**: On-demand provisioning of LibreChat and MCP server instances
+- **🤖 AI-Native Architecture**: Purpose-built for intelligent chat assistants and Model Context Protocol servers
+- **⚡ Declarative Provisioning**: Code-driven infrastructure with GitOps workflows
+- **🔧 MCP Server Orchestration**: Automated Model Context Protocol server lifecycle management
+- **🖥️ Proxmox Virtualization**: Enterprise LXC container management with IaC principles
+- **🌐 Production-Ready**: Professional GitHub setup with external-facing documentation
+- **🛡️ Security-First IaC**: Automated security scanning and compliance validation
+- **📡 API-Driven Management**: RESTful Container Console API for programmatic operations
+- **⚙️ Cursor IDE Integration**: Seamless development workflow with AI-powered coding assistance
 
 ## 📋 Prerequisites
 
-- Python 3.8+ (for scripts and automation)
-- Make (for automation commands)
-- YAML support (for configuration validation)
-- Git (for version control)
+- **Infrastructure as Code Tools**:
+  - Terraform 1.0+ (for infrastructure provisioning)
+  - Ansible 2.9+ (for configuration management)
+  - Python 3.8+ (for automation scripts and API services)
+- **Development Environment**:
+  - Make (for automation commands)
+  - Git (for version control and GitOps workflows)
+  - YAML support (for IaC configuration validation)
+- **Target Infrastructure**:
+  - Proxmox VE 7.0+ (for virtualization platform)
+  - Sufficient resources for AI workloads (LibreChat + MCP servers)
 
 ## 🔧 Quick Start
 
 ### 1. Clone and Setup
 
 ```bash
-git clone https://github.com/edwardhallam/infrastructure-management.git
-cd infrastructure-management
+git clone https://github.com/edwardhallam/ai-infrastructure-platform.git
+cd ai-infrastructure-platform
 
 # Copy environment configuration
 cp env.example .env
@@ -47,38 +57,40 @@ make validate-configs
 make help
 ```
 
-## 🏗️ Infrastructure Components
+## 🏗️ AI Infrastructure Components
 
-### Proxmox Management
-- **Terraform Infrastructure**: Complete LXC container provisioning and management
-- **Python Tools**: Container lifecycle management, storage checking, deployment automation
-- **Container Console API**: Remote container access and command execution
-- **Working Deployment**: LXC container 200 (librechat) running Debian 12
+### 🤖 LibreChat Foundation
+- **AI Chat Assistant**: Core LibreChat deployment with intelligent conversation capabilities
+- **MCP Server Integration**: Model Context Protocol servers for enhanced AI functionality
+- **Cursor Integration**: Seamless development workflow with AI-powered coding assistance
+- **Working Deployment**: LXC container 200 (librechat) running production-ready AI assistant
 
-### Cloudflare Integration
-- Secure tunnel configurations and management
-- Automated deployment scripts
-- DNS and routing management
+### 🚀 Infrastructure as Code (IaC) Automation
+- **Terraform Provisioning**: Declarative LXC container infrastructure for AI workloads with state management
+- **Ansible Configuration Management**: Idempotent LibreChat and MCP server configuration as code
+- **GitOps Workflows**: Version-controlled infrastructure changes with automated validation
+- **Python Automation APIs**: AI-focused container lifecycle management with programmatic interfaces
+- **Container Console API**: RESTful API for remote AI system management and orchestration
 
-### LXC Templates
-- Pre-configured container templates
-- Ubuntu, Debian, and Alpine variants
-- Standardized configurations for Proxmox deployment
+### 🌐 Connectivity & Security
+- **Cloudflare Integration**: Secure tunnel configurations for AI assistant access
+- **Professional DNS**: External-facing setup for production AI deployments
+- **Security Scanning**: AI workload-specific security validation
 
-### Shared Utilities
-- Backup automation and monitoring
-- Security scanning and validation
-- Deployment utilities and scripts
+### 📦 AI-Optimized Templates
+- **LibreChat Templates**: Pre-configured containers optimized for AI chat workloads
+- **MCP Server Templates**: Ready-to-deploy Model Context Protocol server configurations
+- **Development Templates**: Cursor-integrated development environments
 
 ## 📁 Project Structure
 
 ```
-infrastructure-ecosystem/
+ai-infrastructure-platform/
 ├── .github/workflows/       # CI/CD and security automation
-├── proxmox/                # Proxmox infrastructure management
-│   ├── terraform/          # Terraform configurations for LXC containers
-│   ├── python-tools/       # Container management and automation scripts
-│   ├── container-console-api/ # Remote container access API
+├── proxmox/                # AI infrastructure on Proxmox
+│   ├── terraform/          # Terraform configs for LibreChat & MCP containers
+│   ├── python-tools/       # AI workload management and automation scripts
+│   ├── container-console-api/ # Remote AI system management API
 │   ├── docs/              # Proxmox-specific documentation
 │   ├── configs/           # Configuration files
 │   ├── examples/          # Usage examples
@@ -87,10 +99,10 @@ infrastructure-ecosystem/
 │   ├── configs/           # Tunnel configurations
 │   ├── scripts/           # Deployment and management scripts
 │   └── docs/              # Cloudflare documentation
-├── lxc-templates/          # Container templates
-│   ├── ubuntu/            # Ubuntu LXC templates
-│   ├── debian/            # Debian LXC templates
-│   └── alpine/            # Alpine LXC templates
+├── lxc-templates/          # AI-optimized container templates
+│   ├── ubuntu/            # Ubuntu templates for LibreChat/MCP servers
+│   ├── debian/            # Debian templates for AI workloads
+│   └── alpine/            # Lightweight Alpine templates for MCP services
 ├── shared/                 # Common utilities and scripts
 │   ├── scripts/           # Reusable automation scripts
 │   ├── backup/            # Backup utilities
@@ -130,23 +142,35 @@ See [SECURITY_SETUP.md](SECURITY_SETUP.md) for detailed security information.
 - **Component Docs**: Each directory contains specific documentation
 - **Environment Setup**: [env.example](env.example)
 
-## 🎯 Current Deployment Status
+## 🎯 Current AI Deployment Status
 
-- **✅ LXC Container 200 (librechat)**: Running Debian 12, 2 cores, 2GB RAM, 10GB disk
-- **✅ Container Console API**: Operational on port 5000 for remote management
-- **✅ Terraform Infrastructure**: Fully configured with API token authentication
-- **✅ Security Scanning**: Comprehensive validation across all components
-- **✅ Unified Repository**: Complete ecosystem in one location for optimal context
+- **✅ LibreChat AI Assistant**: LXC container 200 running production-ready AI chat system (Debian 12, 2 cores, 2GB RAM, 10GB disk)
+- **✅ Container Console API**: Operational on port 5000 for remote AI system management
+- **✅ Terraform Infrastructure**: Fully configured for AI workload provisioning with API token authentication
+- **✅ MCP Server Ready**: Infrastructure prepared for on-demand Model Context Protocol server deployment
+- **✅ Cursor Integration**: Development workflow optimized for AI-first infrastructure management
+- **✅ Professional GitHub Setup**: External-facing documentation and professional presentation
 
-## 🔄 Migration Notes
+## 🤖 AI Infrastructure as a Service (AI IaaS) Architecture
 
-This repository consolidates multiple previously separate infrastructure repositories:
-- `proxmox-management` (now in `proxmox/`)
-- `cloudflare-tunnel-setup` (now in `cloudflare/`)
-- `lxc-container-templates` (now in `lxc-templates/`)
-- `infrastructure-automation` (now in `shared/`)
+This platform represents a paradigm shift from traditional infrastructure management to AI-native, code-driven operations:
 
-This unified approach eliminates context loss, ensures consistent standards, and simplifies maintenance while preserving all functionality.
+### Core Philosophy
+- **Infrastructure as Code First**: Every component defined, versioned, and managed through declarative code
+- **AI IaaS Delivery Model**: On-demand AI infrastructure provisioning with service-level automation
+- **GitOps-Driven Operations**: Infrastructure changes through pull requests with automated validation
+- **Developer Experience**: Cursor integration for seamless AI-powered development workflows with IaC
+- **Declarative Intelligence**: Code-defined AI chat assistants and MCP servers with reproducible deployments
+- **Enterprise Standards**: Production-ready IaC with security scanning, compliance, and professional documentation
+
+### Consolidated Infrastructure
+This repository unifies previously separate infrastructure components into an AI-focused ecosystem:
+- `proxmox-management` → AI workload provisioning (`proxmox/`)
+- `cloudflare-tunnel-setup` → AI assistant connectivity (`cloudflare/`)
+- `lxc-container-templates` → AI-optimized templates (`lxc-templates/`)
+- `infrastructure-automation` → AI deployment utilities (`shared/`)
+
+The unified approach ensures complete context for AI infrastructure operations while maintaining professional standards for external visibility.
 
 ## 🤝 Contributing
 
