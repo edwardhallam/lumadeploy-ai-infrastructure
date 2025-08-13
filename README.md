@@ -31,8 +31,10 @@ Centralized management for Proxmox, LXC containers, and Cloudflare tunnels with 
 
 ## Getting Started
 
-### 1. Repository Setup
-This is a unified infrastructure repository containing all related projects:
+### 1. Repository Options
+You can work with this infrastructure in two ways:
+
+**Option A: Unified Repository (Recommended for Development)**
 ```bash
 # Clone the entire repository
 git clone https://github.com/edwardhallam/infrastructure-management.git
@@ -42,13 +44,22 @@ cd infrastructure-management
 cursor .  # Opens the entire infrastructure workspace
 ```
 
+**Option B: Individual Repositories**
+```bash
+# Clone specific projects as needed
+git clone https://github.com/edwardhallam/proxmox-lxc-manager.git
+git clone https://github.com/edwardhallam/lxc-container-templates.git
+git clone https://github.com/edwardhallam/cloudflare-tunnel-setup.git
+git clone https://github.com/edwardhallam/infrastructure-automation.git
+```
+
 ### 2. Development Workflow
 1. **Start with Proxmox Management** - Core infrastructure tool
 2. **Add LXC Templates** - Standardize container deployments
 3. **Configure Cloudflare Tunnels** - Secure external access
 4. **Use Shared Scripts** - Automate common operations
 
-### 3. Extension Discovery
+### 4. Extension Discovery
 Cursor will automatically suggest relevant extensions as you work:
 - **Python extension** for Proxmox management
 - **YAML extension** for configurations

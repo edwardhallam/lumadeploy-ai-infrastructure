@@ -1,6 +1,11 @@
 # GitHub Repository Setup Complete ✅
 
-## All infrastructure projects are now consolidated in one **PRIVATE** repository
+## Infrastructure projects available in both unified and individual repositories
+
+### Repository Strategy
+- **Main Repository**: `infrastructure-management` (for development)
+- **Individual Repositories**: Available for specific project focus
+- **Flexible Deployment**: Choose which approach works best for your needs
 
 ### 1. Main Infrastructure Repository
 - **Name**: `infrastructure-management`
@@ -8,23 +13,22 @@
 - **Description**: Centralized infrastructure management for Proxmox, LXC containers, and Cloudflare tunnels
 - **Status**: ✅ Created, ✅ Pushed, ✅ Consolidated
 
-### 2. Consolidated Projects
-All projects are now contained within the main repository:
+### 2. Individual Project Repositories
+Each project is available as a separate repository:
 
-- **Proxmox Management** (`proxmox-management/`)
+- **Proxmox Management** (`proxmox-lxc-manager`)
   - Python-based Proxmox VE and LXC container management tool
   - Environment variable configuration support
-  - Ready for development
 
-- **LXC Container Templates** (`lxc-templates/`)
+- **LXC Container Templates** (`lxc-container-templates`)
   - Standardized LXC container configurations for Proxmox deployment
   - YAML-based configuration files
 
-- **Cloudflare Tunnels** (`cloudflare-tunnels/`)
+- **Cloudflare Tunnels** (`cloudflare-tunnel-setup`)
   - Cloudflare tunnel configuration and management
   - Secure service access setup
 
-- **Shared Automation Scripts** (`shared-scripts/`)
+- **Shared Automation Scripts** (`infrastructure-automation`)
   - Common automation and utility scripts
   - Backup, monitoring, and deployment automation
 
@@ -69,10 +73,18 @@ Cursor will now suggest relevant extensions as you work with:
 
 ## Repository URLs Summary
 ```
-Main:           https://github.com/edwardhallam/infrastructure-management
-                (Contains all projects: Proxmox, LXC, Cloudflare, Scripts)
+Main Unified:    https://github.com/edwardhallam/infrastructure-management
+                 (Private - contains all projects for development)
+
+Individual Repositories:
+Proxmox:         https://github.com/edwardhallam/proxmox-lxc-manager
+LXC Templates:   https://github.com/edwardhallam/lxc-container-templates
+Cloudflare:      https://github.com/edwardhallam/cloudflare-tunnel-setup
+Scripts:         https://github.com/edwardhallam/infrastructure-automation
 ```
 
-**Note**: All projects have been consolidated into the main `infrastructure-management` repository for easier management and development.
+**Note**: Choose your approach based on your needs:
+- **Unified**: For development and collaboration
+- **Individual**: For specific project focus and deployment
 
 All repositories are now ready for development with proper version control and security! 🚀
