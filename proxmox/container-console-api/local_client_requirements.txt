@@ -1,0 +1,8 @@
+# Local Client Requirements
+# Install on your local machine (where Cursor is running)
+
+# Core dependencies
+requests==2.31.0
+
+
+

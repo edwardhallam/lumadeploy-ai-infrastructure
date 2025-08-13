@@ -1,13 +1,17 @@
-# Infrastructure Management
+# Infrastructure Ecosystem
 
-A comprehensive infrastructure management repository containing tools, configurations, and automation for various infrastructure components including Cloudflare tunnels, LXC templates, and shared scripts.
+**🎯 Complete Infrastructure Management in One Repository**
+
+A unified infrastructure management ecosystem containing all tools, configurations, and automation for Proxmox virtualization, Cloudflare tunnels, LXC containers, and shared infrastructure utilities. This consolidated approach ensures complete context, consistent standards, and simplified maintenance.
 
 ## 🚀 Features
 
+- **Unified Ecosystem**: All infrastructure components in one repository for complete context
+- **Proxmox Integration**: Full LXC container management with Terraform and Python tools
+- **Container Console API**: Remote container management and automation
 - **Multi-Cloud Infrastructure**: Support for various cloud and on-premises solutions
-- **Security-First**: Automated security scanning and validation
+- **Security-First**: Automated security scanning and validation across all components
 - **Infrastructure as Code**: Version-controlled infrastructure configurations
-- **Modular Design**: Organized components for different infrastructure needs
 - **Professional Tooling**: Industry-standard DevOps practices
 
 ## 📋 Prerequisites
@@ -45,33 +49,57 @@ make help
 
 ## 🏗️ Infrastructure Components
 
-### Cloudflare Tunnels
-- Secure tunnel configurations
+### Proxmox Management
+- **Terraform Infrastructure**: Complete LXC container provisioning and management
+- **Python Tools**: Container lifecycle management, storage checking, deployment automation
+- **Container Console API**: Remote container access and command execution
+- **Working Deployment**: LXC container 200 (librechat) running Debian 12
+
+### Cloudflare Integration
+- Secure tunnel configurations and management
 - Automated deployment scripts
 - DNS and routing management
 
 ### LXC Templates
 - Pre-configured container templates
 - Ubuntu, Debian, and Alpine variants
-- Standardized configurations
+- Standardized configurations for Proxmox deployment
 
-### Shared Scripts
-- Backup automation
-- Deployment utilities
-- Monitoring tools
+### Shared Utilities
+- Backup automation and monitoring
+- Security scanning and validation
+- Deployment utilities and scripts
 
 ## 📁 Project Structure
 
 ```
-infrastructure-management/
+infrastructure-ecosystem/
 ├── .github/workflows/       # CI/CD and security automation
-├── cloudflare-tunnels/      # Cloudflare tunnel configurations
+├── proxmox/                # Proxmox infrastructure management
+│   ├── terraform/          # Terraform configurations for LXC containers
+│   ├── python-tools/       # Container management and automation scripts
+│   ├── container-console-api/ # Remote container access API
+│   ├── docs/              # Proxmox-specific documentation
+│   ├── configs/           # Configuration files
+│   ├── examples/          # Usage examples
+│   └── tests/             # Test suites
+├── cloudflare/             # Cloudflare tunnel management
+│   ├── configs/           # Tunnel configurations
+│   ├── scripts/           # Deployment and management scripts
+│   └── docs/              # Cloudflare documentation
 ├── lxc-templates/          # Container templates
-├── shared-scripts/         # Reusable automation scripts
-├── scripts/               # Security and validation tools
-├── docs/                  # Documentation
+│   ├── ubuntu/            # Ubuntu LXC templates
+│   ├── debian/            # Debian LXC templates
+│   └── alpine/            # Alpine LXC templates
+├── shared/                 # Common utilities and scripts
+│   ├── scripts/           # Reusable automation scripts
+│   ├── backup/            # Backup utilities
+│   ├── monitoring/        # Monitoring tools
+│   └── security/          # Security validation tools
+├── scripts/               # Root-level automation and security
+├── docs/                  # General documentation
 ├── env.example            # Environment configuration template
-├── Makefile              # Automation commands
+├── Makefile              # Unified automation commands
 └── README.md             # This file
 ```
 
@@ -102,9 +130,23 @@ See [SECURITY_SETUP.md](SECURITY_SETUP.md) for detailed security information.
 - **Component Docs**: Each directory contains specific documentation
 - **Environment Setup**: [env.example](env.example)
 
-## 🔗 Related Projects
+## 🎯 Current Deployment Status
 
-- **[proxmox-management](https://github.com/edwardhallam/proxmox-management)**: Dedicated Proxmox LXC management with Terraform
+- **✅ LXC Container 200 (librechat)**: Running Debian 12, 2 cores, 2GB RAM, 10GB disk
+- **✅ Container Console API**: Operational on port 5000 for remote management
+- **✅ Terraform Infrastructure**: Fully configured with API token authentication
+- **✅ Security Scanning**: Comprehensive validation across all components
+- **✅ Unified Repository**: Complete ecosystem in one location for optimal context
+
+## 🔄 Migration Notes
+
+This repository consolidates multiple previously separate infrastructure repositories:
+- `proxmox-management` (now in `proxmox/`)
+- `cloudflare-tunnel-setup` (now in `cloudflare/`)
+- `lxc-container-templates` (now in `lxc-templates/`)
+- `infrastructure-automation` (now in `shared/`)
+
+This unified approach eliminates context loss, ensures consistent standards, and simplifies maintenance while preserving all functionality.
 
 ## 🤝 Contributing
 
