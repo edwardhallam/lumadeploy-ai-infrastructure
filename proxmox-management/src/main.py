@@ -8,14 +8,14 @@ import json
 import os
 import requests
 import urllib3
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 from urllib.parse import urljoin
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()
 
-def get_config():
+def get_config() -> dict:
     """Get configuration from environment variables with sensible defaults"""
     return {
         'host': os.getenv('PROXMOX_HOST', 'localhost'),
@@ -47,7 +47,7 @@ class ProxmoxManager:
             raise ConnectionError(f"Failed to connect to Proxmox host: {host}")
     
     @classmethod
-    def from_env(cls):
+    def from_env(cls) -> 'ProxmoxManager':
         """Create ProxmoxManager instance from environment variables"""
         config = get_config()
         if not config['api_token']:
@@ -87,7 +87,7 @@ class ProxmoxManager:
             print(f"Exception type: {type(e).__name__}")
             return False
     
-    def get_nodes(self) -> List[Dict]:
+    def get_nodes(self) -> List[Dict[str, Any]]:
         """Get list of Proxmox nodes"""
         try:
             response = self.session.get(
@@ -101,7 +101,7 @@ class ProxmoxManager:
             print(f"Failed to get nodes: {e}")
             return []
     
-    def get_node_status(self, node: str) -> Optional[Dict]:
+    def get_node_status(self, node: str) -> Optional[Dict[str, Any]]:
         """Get detailed status of a specific node"""
         try:
             response = self.session.get(
@@ -191,7 +191,7 @@ class ProxmoxManager:
             print(f"Failed to get capacity for {node}: {e}")
             return None
     
-    def print_capacity_summary(self, node: str):
+    def print_capacity_summary(self, node: str) -> None:
         """Print a formatted capacity summary for a node"""
         capacity = self.get_node_capacity(node)
         if not capacity:
@@ -242,7 +242,7 @@ class ProxmoxManager:
         print(f"⏱️  Uptime: {uptime} seconds")
         print(f"📈 Load Average: {', '.join(map(str, loadavg))}")
     
-    def list_containers(self, node: str) -> List[Dict]:
+    def list_containers(self, node: str) -> List[Dict[str, Any]]:
         """List LXC containers on a specific node"""
         try:
             response = self.session.get(
