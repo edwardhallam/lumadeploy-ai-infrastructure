@@ -1,84 +1,118 @@
 # Infrastructure Management
 
-## Overview
-Centralized management for Proxmox, LXC containers, and Cloudflare tunnels with automation and best practices.
+A comprehensive infrastructure management repository containing tools, configurations, and automation for various infrastructure components including Cloudflare tunnels, LXC templates, and shared scripts.
 
-## Technology Stack
-- **Infrastructure**: Proxmox VE, LXC Containers, Docker
-- **Languages**: Python 3.9+, Bash, YAML
-- **APIs**: Proxmox REST API, Cloudflare API
-- **Tools**: Git, Make, Docker Compose
-- **Testing**: Pytest, Coverage, Type Checking
-- **Quality**: Mypy, Pydantic, Custom Exceptions
+## 🚀 Features
 
-## Key Features
-- **Automated Infrastructure Management** - API-driven Proxmox operations
-- **Container Orchestration** - Standardized LXC templates and deployment
-- **Secure Networking** - Cloudflare tunnels with SSL termination
-- **Professional Code Quality** - Comprehensive testing, type hints, logging
-- **DevOps Automation** - Shared scripts for backup, monitoring, deployment
-- **Configuration Management** - Environment-based configs with validation
+- **Multi-Cloud Infrastructure**: Support for various cloud and on-premises solutions
+- **Security-First**: Automated security scanning and validation
+- **Infrastructure as Code**: Version-controlled infrastructure configurations
+- **Modular Design**: Organized components for different infrastructure needs
+- **Professional Tooling**: Industry-standard DevOps practices
 
-## Projects
+## 📋 Prerequisites
 
-### Proxmox Management
-- **Location**: `proxmox-management/`
-- **Purpose**: Proxmox API integration and LXC container management
-- **Language**: Python
-- **Key Features**: Node management, container operations, API integration
+- Python 3.8+ (for scripts and automation)
+- Make (for automation commands)
+- YAML support (for configuration validation)
+- Git (for version control)
 
-### LXC Templates
-- **Location**: `lxc-templates/`
-- **Purpose**: Standardized LXC container configurations
-- **Format**: YAML
-- **Key Features**: OS templates, resource specifications, network configs
+## 🔧 Quick Start
 
-### Cloudflare Tunnels
-- **Location**: `cloudflare-tunnels/`
-- **Purpose**: Tunnel configuration and management
-- **Format**: YAML + Docker
-- **Key Features**: Secure tunneling, SSL termination, domain management
+### 1. Clone and Setup
 
-### Shared Scripts
-- **Location**: `shared-scripts/`
-- **Purpose**: Common automation and utility scripts
-- **Format**: Bash + Python
-- **Key Features**: Backup, monitoring, deployment automation
-
-## Quick Start
-### Prerequisites
-- Python 3.9+
-- Docker & Docker Compose
-- Proxmox VE environment
-- Cloudflare account
-
-### Setup
 ```bash
-# Clone and navigate
-git clone <repository-url>
+git clone https://github.com/edwardhallam/infrastructure-management.git
 cd infrastructure-management
 
-# Install dependencies for specific projects
-cd proxmox-management
-pip install -r requirements.txt
-
-# Configure environment
+# Copy environment configuration
 cp env.example .env
-# Edit .env with your configuration
+# Edit .env with your actual values
 ```
 
-## Architecture
+### 2. Run Security Checks
+
+```bash
+# Run security validation
+make security-check
+
+# Validate configurations
+make validate-configs
+
+# See all available commands
+make help
+```
+
+## 🏗️ Infrastructure Components
+
+### Cloudflare Tunnels
+- Secure tunnel configurations
+- Automated deployment scripts
+- DNS and routing management
+
+### LXC Templates
+- Pre-configured container templates
+- Ubuntu, Debian, and Alpine variants
+- Standardized configurations
+
+### Shared Scripts
+- Backup automation
+- Deployment utilities
+- Monitoring tools
+
+## 📁 Project Structure
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Proxmox      │    │   LXC           │    │   Cloudflare    │
-│   Management   │◄──►│   Templates     │◄──►│   Tunnels       │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         └───────────────────────┼───────────────────────┘
-                                 │
-                    ┌─────────────────┐
-                    │   Shared        │
-                    │   Scripts       │
-                    └─────────────────┘
+infrastructure-management/
+├── .github/workflows/       # CI/CD and security automation
+├── cloudflare-tunnels/      # Cloudflare tunnel configurations
+├── lxc-templates/          # Container templates
+├── shared-scripts/         # Reusable automation scripts
+├── scripts/               # Security and validation tools
+├── docs/                  # Documentation
+├── env.example            # Environment configuration template
+├── Makefile              # Automation commands
+└── README.md             # This file
 ```
+
+## 🔍 Available Commands
+
+```bash
+make security-check        # Run security validation
+make security-check-dry-run # Test security checks
+make validate-configs      # Validate YAML configurations
+make pre-commit           # Run pre-commit validation
+make docs                 # Show documentation locations
+make help                 # Show all available commands
+```
+
+## 🛡️ Security Features
+
+- **Automated Security Scanning**: GitHub Actions and local validation
+- **Sensitive Data Protection**: Environment variable management
+- **Configuration Validation**: YAML and infrastructure checks
+- **Pre-commit Hooks**: Local development security
+
+See [SECURITY_SETUP.md](SECURITY_SETUP.md) for detailed security information.
+
+## 📚 Documentation
+
+- **Main Documentation**: This README
+- **Security Setup**: [SECURITY_SETUP.md](SECURITY_SETUP.md)
+- **Component Docs**: Each directory contains specific documentation
+- **Environment Setup**: [env.example](env.example)
+
+## 🔗 Related Projects
+
+- **[proxmox-management](https://github.com/edwardhallam/proxmox-management)**: Dedicated Proxmox LXC management with Terraform
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License.

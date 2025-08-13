@@ -1,11 +1,8 @@
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
+# Environment files
+.env
+.env.local
+.env.production
+.env.staging
 
 # Python
 __pycache__/
@@ -34,8 +31,8 @@ MANIFEST
 venv/
 env/
 ENV/
-env.bak/
-venv.bak/
+cursor-client-env/
+.venv/
 
 # IDE
 .vscode/
@@ -44,27 +41,42 @@ venv.bak/
 *.swo
 *~
 
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
 # Logs
 *.log
 logs/
 
-# Environment variables
-.env
-.env.local
-.env.*.local
+# Coverage reports
+.coverage
+htmlcov/
+.pytest_cache/
 
-# Backup files
-*.bak
-*.backup
+# Infrastructure-specific files
+*.tfvars
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# Sensitive configuration files
+config.local.*
+secrets.*
+private.*
 
 # Temporary files
 *.tmp
 *.temp
+*.bak
+*.backup
 
-# Credentials (never commit these!)
-*.pem
-*.key
-*.crt
-credentials/
-secrets/
-__pycache__/
+# Local configuration
+config.local.yml
+config.local.yaml
