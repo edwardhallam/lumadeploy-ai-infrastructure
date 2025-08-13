@@ -44,27 +44,3 @@ Centralized management for Proxmox, LXC containers, and Cloudflare tunnels with 
                     │   Scripts       │
                     └─────────────────┘
 ```
-
-## Backup Strategy
-- **Git repositories** for version control
-- **Automated backups** via shared scripts
-- **Cloud storage** for critical configurations
-- **Documentation** for recovery procedures
-
-## Security Considerations
-- **API tokens** stored securely
-- **SSH keys** for remote access
-- **Tunnel authentication** via Cloudflare
-- **Container isolation** and resource limits
-
-## Contributing
-1. Follow the established project structure
-2. Update documentation for new features
-3. Test scripts in development environment
-4. Use consistent naming conventions
-
-## Support
-- Check project-specific READMEs within this repository for detailed setup
-- Use shared scripts for common operations
-- Document any custom configurations
-- Maintain runbooks for troubleshooting
