@@ -1,0 +1,42 @@
+---
+- name: Deploy AI Infrastructure Platform
+  hosts: all
+  become: true
+  gather_facts: true
+  
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+    
+  pre_tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+      
+    - name: Install essential packages
+      apt:
+        name:
+          - curl
+          - wget
+          - git
+          - vim
+          - htop
+          - net-tools
+          - ufw
+        state: present
+        
+    - name: Configure firewall
+      ufw:
+        state: enabled
+        policy: deny
+        rule: allow
+        port: '22'
+        proto: tcp
+        
+  roles:
+    - common
+    - librechat
+    - mcp_server
+    - monitoring
+    - reverse_proxy
+    - security

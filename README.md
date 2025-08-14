@@ -1,134 +1,295 @@
-# AI-First Infrastructure Platform
+# AI Infrastructure Platform - End User Edition
 
-**🤖 AI Infrastructure as a Service (AI IaaS) with IaC Automation**
+**🚀 Professional GitOps + Interactive Setup for AI Infrastructure**
 
-An AI Infrastructure as a Service platform that enables a fully customizable AI assistant and on-demand MCP (Model Context Protocol) servers through comprehensive Infrastructure as Code (IaC). Built for developers who demand intelligent AI chat systems with Cursor integration, featuring automated provisioning via Terraform and Ansible on Proxmox infrastructure. This platform transforms traditional infrastructure into an AI-native, code-driven experience.
+This repository provides a **hybrid approach** that combines the best of both worlds:
+- **Interactive Setup with Cursor** - Get guided through configuration
+- **GitOps Deployment** - Professional Infrastructure as Code with full audit trail
+- **Automated Infrastructure** - Terraform + Ansible + GitHub Actions
 
-## 🚀 Features
+## 🎯 **What This Platform Provides**
 
-- **🏗️ Infrastructure as Code (IaC)**: Terraform + Ansible automation for reproducible, version-controlled deployments
-- **☁️ AI Infrastructure as a Service (AI IaaS)**: On-demand provisioning of LibreChat and MCP server instances
-- **🤖 AI-Native Architecture**: Purpose-built for intelligent chat assistants and Model Context Protocol servers
-- **⚡ Declarative Provisioning**: Code-driven infrastructure with GitOps workflows
-- **🔧 MCP Server Orchestration**: Automated Model Context Protocol server lifecycle management
-- **🖥️ Proxmox Virtualization**: Enterprise LXC container management with IaC principles
-- **🌐 Production-Ready**: Professional GitHub setup with external-facing documentation
-- **🛡️ Security-First IaC**: Automated security scanning and compliance validation
-- **📡 API-Driven Management**: RESTful Container Console API for programmatic operations
-- **⚙️ Cursor IDE Integration**: Seamless development workflow with AI-powered coding assistance
+Transform your Proxmox environment into a powerful AI infrastructure platform with:
+- **LibreChat** - Self-hosted AI chat assistant
+- **MCP Server** - Model Context Protocol server for AI tools
+- **Monitoring & Logging** - Prometheus, Grafana, and centralized logging
+- **Reverse Proxy** - Nginx with SSL termination and load balancing
+- **Security Hardening** - Firewall rules, access control, and security policies
 
-## 📋 Prerequisites
+## 🏗️ **Architecture Overview**
 
-- **Infrastructure as Code Tools**:
-  - Terraform 1.0+ (for infrastructure provisioning)
-  - Ansible 2.9+ (for configuration management)
-  - Python 3.8+ (for automation scripts and API services)
-- **Development Environment**:
-  - Make (for automation commands)
-  - Git (for version control and GitOps workflows)
-  - YAML support (for IaC configuration validation)
-- **Target Infrastructure**:
-  - Proxmox VE 7.0+ (for virtualization platform)
-  - Sufficient resources for AI workloads (LibreChat + MCP servers)
-
-## 🔧 Quick Start
-
-### 1. Clone and Setup
-
-```bash
-git clone https://github.com/edwardhallam/ai-infrastructure-platform.git
-cd ai-infrastructure-platform
-
-# Copy environment configuration
-cp env.example .env
-# Edit .env with your actual values
+```
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   Interactive   │    │   GitOps         │    │   Infrastructure│
+│   Setup with    │───▶│   Workflow       │───▶│   Deployment    │
+│   Cursor        │    │   (Git + GitHub) │    │   (Proxmox)     │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
 ```
 
-### 2. Run Security Checks
+### **1. Interactive Setup Phase**
+- Cursor guides you through configuration
+- Script generates Terraform and Ansible files
+- All settings explained and validated
 
+### **2. GitOps Deployment Phase**
+- Commit configuration changes to git
+- GitHub Actions automatically validates and deploys
+- Full audit trail of all infrastructure changes
+
+### **3. Infrastructure Management**
+- Terraform manages Proxmox resources
+- Ansible configures services and applications
+- Automated monitoring and health checks
+
+## 🚀 **Quick Start with Cursor**
+
+### **Prerequisites**
+- **Cursor IDE** - Your AI coding assistant
+- **Proxmox VE** - Virtualization platform
+- **Git** - Version control
+- **Python 3.8+** - For local development tools
+
+### **Step 1: Clone and Setup**
 ```bash
-# Run security validation
-make security-check
-
-# Validate configurations
-make validate-configs
-
-# See all available commands
-make help
+git clone https://github.com/edwardhallam/ai-infrastructure-end-user.git
+cd ai-infrastructure-end-user
+./setup.sh
 ```
 
-## 🏗️ AI Infrastructure Components
+**💡 Ask Cursor**: "Help me run the setup script and configure my AI infrastructure"
 
-### 🤖 LibreChat Foundation
-- **AI Chat Assistant**: Core LibreChat deployment with intelligent conversation capabilities
-- **MCP Server Integration**: Model Context Protocol servers for enhanced AI functionality
-- **Cursor Integration**: Seamless development workflow with AI-powered coding assistance
+### **Step 2: Follow Cursor's Guidance**
+The setup script will:
+- Check prerequisites and install missing tools
+- Guide you through Proxmox configuration
+- Help you configure network settings
+- Generate all necessary IaC files
+- Explain the GitOps workflow
 
-### 🚀 Infrastructure as Code (IaC) Automation
-- **Terraform Provisioning**: Declarative LXC container infrastructure for AI workloads with state management
-- **Ansible Configuration Management**: Idempotent LibreChat and MCP server configuration as code
-- **GitOps Workflows**: Version-controlled infrastructure changes with automated validation
-- **Python Automation APIs**: AI-focused container lifecycle management with programmatic interfaces
-- **Container Console API**: RESTful API for remote AI system management and orchestration
-
-### 🌐 Connectivity & Security
-- **Cloudflare Integration**: Secure tunnel configurations for AI assistant access
-- **Professional DNS**: External-facing setup for production AI deployments
-- **Security Scanning**: AI workload-specific security validation
-
-### 📦 AI-Optimized Templates
-- **LibreChat Templates**: Pre-configured containers optimized for AI chat workloads
-- **MCP Server Templates**: Ready-to-deploy Model Context Protocol server configurations
-- **Development Templates**: Cursor-integrated development environments
-
-
-## 🔍 Available Commands
-
+### **Step 3: Deploy via GitOps**
 ```bash
-make security-check        # Run security validation
-make security-check-dry-run # Test security checks
-make validate-configs      # Validate YAML configurations
-make pre-commit           # Run pre-commit validation
-make docs                 # Show documentation locations
-make help                 # Show all available commands
+# Commit your configuration
+git add infrastructure/config/
+git commit -m "Configure AI infrastructure for production"
+git push origin main
+
+# GitHub Actions will automatically deploy your infrastructure!
 ```
 
-## 🛡️ Security Features
+**💡 Ask Cursor**: "Help me commit and push my configuration to trigger deployment"
 
-- **Automated Security Scanning**: GitHub Actions and local validation
-- **Sensitive Data Protection**: Environment variable management
-- **Configuration Validation**: YAML and infrastructure checks
-- **Pre-commit Hooks**: Local development security
+## 🔧 **Available Commands**
 
-See [SECURITY_SETUP.md](SECURITY_SETUP.md) for detailed security information.
+### **Setup and Configuration**
+```bash
+make setup          # Interactive configuration setup
+make validate       # Validate Terraform and Ansible configs
+make plan           # Plan Terraform deployment
+```
 
-## 📚 Documentation
+### **GitOps Deployment**
+```bash
+make deploy         # Deploy via GitHub Actions (commit & push)
+make status         # Check infrastructure status
+make logs           # View deployment logs (GitHub Actions)
+```
 
-- **Main Documentation**: This README
-- **Security Setup**: [SECURITY_SETUP.md](SECURITY_SETUP.md)
-- **Component Docs**: Each directory contains specific documentation
-- **Environment Setup**: [env.example](env.example)
+### **Development and Testing**
+```bash
+make test-connection # Test Proxmox connectivity
+make activate        # Activate Python virtual environment
+make help            # Show all available commands
+```
 
-## 🤖 AI Infrastructure as a Service (AI IaaS) Architecture
+**💡 Ask Cursor**: "What does this command do and how do I use it?"
 
-This platform represents a paradigm shift from traditional infrastructure management to AI-native, code-driven operations:
+## 🏗️ **Infrastructure Components**
 
-### Core Philosophy
-- **Infrastructure as Code First**: Defined, versioned, and managed through declarative code
-- **AI IaaS Delivery Model**: On-demand AI infrastructure provisioning with service-level automation
-- **GitOps-Driven Operations**: Infrastructure changes through pull requests with automated validation
-- **Developer Experience**: Cursor integration for seamless AI-powered development workflows with IaC
-- **Declarative Intelligence**: Code-defined AI chat assistants and MCP servers with reproducible deployments
-- **Enterprise Standards**: Production-ready IaC with security scanning, compliance, and professional documentation
+### **LXC Containers Created**
+- **LibreChat** - AI chat interface (Port 3000)
+- **MCP Server** - Model Context Protocol (Port 8000)
+- **Monitoring** - Prometheus + Grafana (Ports 9090, 3000)
+- **Reverse Proxy** - Nginx with SSL (Ports 80, 443)
 
+### **Network Configuration**
+- Automatic IP assignment from your subnet
+- Bridge networking with Proxmox
+- Configurable DNS servers
+- Firewall rules for security
 
-## 🤝 Contributing
+### **Storage Management**
+- Configurable storage pools
+- Resource limits (CPU, memory, storage)
+- Automatic container sizing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
+## 🔄 **GitOps Workflow**
 
-## 📄 License
+### **Configuration Management**
+1. **Edit files** in `infrastructure/config/`
+2. **Commit changes** with descriptive messages
+3. **Push to main** to trigger deployment
+4. **Monitor progress** in GitHub Actions
 
-This project is licensed under the MIT License.
+### **Deployment Pipeline**
+```
+Push to main → Validate → Plan → Deploy → Monitor
+```
+
+- **Validate**: Check syntax and format
+- **Plan**: Generate deployment plan
+- **Deploy**: Apply infrastructure changes
+- **Monitor**: Track deployment status
+
+### **Benefits of GitOps**
+- **Audit Trail**: All changes tracked in git
+- **Rollback**: Revert to previous configurations
+- **Collaboration**: Multiple users can contribute
+- **Automation**: No manual deployment steps
+
+## 🤖 **Cursor's Role in This Workflow**
+
+### **1. Setup Guidance**
+- **Explains each configuration option** in simple terms
+- **Helps you find correct values** for your environment
+- **Validates inputs** before generating files
+- **Shows examples** of good configurations
+
+### **2. GitOps Education**
+- **Explains the workflow** - why we commit before deploying
+- **Guides git operations** - add, commit, push
+- **Explains GitHub Actions** - what happens after push
+- **Shows deployment status** - how to monitor progress
+
+### **3. Troubleshooting Support**
+- **Analyzes GitHub Actions logs** when deployments fail
+- **Explains Terraform/Ansible errors** in user-friendly terms
+- **Suggests fixes** for common issues
+- **Guides rollback procedures** if needed
+
+## 📚 **Documentation**
+
+### **Guides**
+- **[GitOps Guide](docs/gitops-guide.md)** - Understanding the deployment workflow
+- **[Troubleshooting](docs/troubleshooting.md)** - Common issues and solutions
+- **[API Reference](docs/api.md)** - Command reference and usage
+- **[Architecture](docs/architecture.md)** - System design and components
+
+### **Configuration Examples**
+- **[Terraform Variables](infrastructure/config/terraform.tfvars.example)** - Infrastructure configuration
+- **[Ansible Variables](infrastructure/config/ansible-vars.yml.example)** - Service configuration
+
+## 🔐 **Security Features**
+
+### **Infrastructure Security**
+- **Firewall rules** - Only necessary ports open
+- **SSH key authentication** - No password-based access
+- **Container isolation** - LXC security features
+- **Network segmentation** - Isolated container networks
+
+### **Access Control**
+- **Proxmox API tokens** - Secure authentication
+- **SSH key management** - Automated key distribution
+- **User permissions** - Role-based access control
+- **Audit logging** - Track all access attempts
+
+## 📊 **Monitoring and Observability**
+
+### **Infrastructure Monitoring**
+- **Prometheus** - Metrics collection and storage
+- **Grafana** - Visualization and dashboards
+- **Container health checks** - Automated status monitoring
+- **Resource utilization** - CPU, memory, storage tracking
+
+### **Logging and Debugging**
+- **Centralized logging** - All container logs in one place
+- **Error tracking** - Automated error detection and reporting
+- **Performance metrics** - Response time and throughput monitoring
+- **Health status** - Real-time infrastructure health
+
+## 🚨 **Getting Help**
+
+### **1. Ask Cursor First**
+Cursor is your AI assistant and knows this platform inside and out:
+- **"Help me understand the GitOps workflow"**
+- **"Guide me through committing and pushing changes"**
+- **"Help me troubleshoot this deployment error"**
+- **"Explain what this GitHub Actions log means"**
+
+### **2. Check Documentation**
+- Review the guides in the `docs/` directory
+- Check configuration examples in `infrastructure/config/`
+- Review GitHub Actions logs for deployment issues
+
+### **3. Common Issues**
+- **Missing configuration files** → Run `./setup.sh`
+- **Terraform validation errors** → Run `make validate`
+- **GitHub Actions failures** → Check Actions tab and logs
+- **Proxmox connection issues** → Verify credentials and network
+
+## 🔄 **Workflow Examples**
+
+### **Adding a New Service**
+1. **Edit configuration** - Add service to Ansible variables
+2. **Ask Cursor** - "Help me add a new service to the infrastructure"
+3. **Commit changes** - `git add infrastructure/config/`
+4. **Push to deploy** - `git push origin main`
+5. **Monitor deployment** - Check GitHub Actions progress
+
+### **Updating Resource Limits**
+1. **Edit Terraform variables** - Modify CPU/memory limits
+2. **Ask Cursor** - "Help me update the resource allocation"
+3. **Commit and push** - Changes automatically deployed
+4. **Verify changes** - Check new resource allocation
+
+### **Rollback Configuration**
+1. **Revert commit** - `git revert HEAD`
+2. **Push changes** - `git push origin main`
+3. **Monitor rollback** - GitHub Actions will revert infrastructure
+4. **Verify rollback** - Check that changes were reverted
+
+## 🎯 **Next Steps**
+
+### **Immediate Actions**
+1. **Run the setup script** - `./setup.sh` with Cursor's help
+2. **Configure GitHub secrets** - Proxmox credentials, SSH keys
+3. **Test the GitOps workflow** - Commit and push configuration
+4. **Monitor deployment** - Check GitHub Actions progress
+
+### **Future Enhancements**
+- **Add more AI services** - Additional AI models and tools
+- **Implement backup automation** - Automated backup workflows
+- **Add multi-environment support** - Dev, staging, production
+- **Enhance monitoring** - Custom dashboards and alerts
+- **Security scanning** - Container vulnerability checks
+
+## 🏆 **Why This Approach?**
+
+### **For End-Users**
+- **Learn real-world practices** - Professional IaC experience
+- **Interactive guidance** - Cursor helps with every step
+- **Automated deployment** - No manual infrastructure management
+- **Full audit trail** - All changes tracked and documented
+- **Rollback capability** - Safe, controlled infrastructure changes
+
+### **For the Platform**
+- **Promotes best practices** - Users learn proper IaC
+- **Professional workflow** - Enterprise-grade deployment
+- **Better user education** - Users understand GitOps principles
+- **Scalable architecture** - Supports team collaboration
+- **Reduced support burden** - Cursor handles most questions
+
+## 🎉 **Ready to Get Started?**
+
+**The AI Infrastructure Platform is ready to transform your Proxmox environment!**
+
+1. **Clone this repository**
+2. **Run `./setup.sh` with Cursor's guidance**
+3. **Configure your infrastructure**
+4. **Commit and push to deploy**
+5. **Monitor your automated deployment**
+
+**💡 Remember: Cursor is your AI assistant throughout this entire process!**
+
+---
+
+**Happy deploying with GitOps and Cursor! 🚀🤖✨**

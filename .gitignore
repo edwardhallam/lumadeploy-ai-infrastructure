@@ -1,4 +1,7 @@
-# Environment files
+# AI Infrastructure Platform - End User Workspace
+# ==============================================
+
+# Environment files (contain sensitive data)
 .env
 .env.local
 .env.production
@@ -31,8 +34,8 @@ MANIFEST
 venv/
 env/
 ENV/
-cursor-client-env/
-.venv/
+env.bak/
+venv.bak/
 
 # IDE
 .vscode/
@@ -53,30 +56,22 @@ Thumbs.db
 # Logs
 *.log
 logs/
-
-# Coverage reports
-.coverage
-htmlcov/
-.pytest_cache/
-
-# Infrastructure-specific files
-*.tfvars
-*.tfstate
-*.tfstate.*
-.terraform/
-.terraform.lock.hcl
-
-# Sensitive configuration files
-config.local.*
-secrets.*
-private.*
+deployment.log
 
 # Temporary files
 *.tmp
 *.temp
+.cache/
+
+# Backup files
 *.bak
 *.backup
 
-# Local configuration
+# Test coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Local configuration overrides
 config.local.yml
-config.local.yaml
+settings.local.py

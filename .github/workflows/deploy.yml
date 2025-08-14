@@ -1,0 +1,187 @@
+name: Deploy AI Infrastructure
+
+on:
+  push:
+    branches: [main]
+    paths: ['infrastructure/config/**', 'infrastructure/terraform/**', 'infrastructure/ansible/**']
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        default: 'deploy'
+        type: choice
+        options:
+        - deploy
+        - destroy
+        - plan
+
+env:
+  TF_VERSION: '1.7.0'
+  ANSIBLE_VERSION: '8.6.0'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        
+      - name: Validate Terraform configuration
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          
+      - name: Terraform Format Check
+        run: |
+          cd infrastructure/terraform
+          terraform fmt -check
+          
+      - name: Terraform Validate
+        run: |
+          cd infrastructure/terraform
+          terraform init
+          terraform validate
+          
+      - name: Validate Ansible playbooks
+        run: |
+          cd infrastructure/ansible
+          ansible-playbook --version
+          ansible-playbook --syntax-check site.yml
+
+  plan:
+    needs: validate
+    runs-on: ubuntu-latest
+    if: github.event.inputs.action == 'plan' || github.event_name == 'push'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          
+      - name: Configure Proxmox credentials
+        run: |
+          echo "proxmox_host=${{ secrets.PROXMOX_HOST }}" >> $GITHUB_ENV
+          echo "proxmox_user=${{ secrets.PROXMOX_USER }}" >> $GITHUB_ENV
+          echo "proxmox_password=${{ secrets.PROXMOX_PASSWORD }}" >> $GITHUB_ENV
+          echo "proxmox_node=${{ secrets.PROXMOX_NODE }}" >> $GITHUB_ENV
+          
+      - name: Terraform Init
+        run: |
+          cd infrastructure/terraform
+          terraform init
+          
+      - name: Terraform Plan
+        run: |
+          cd infrastructure/terraform
+          terraform plan \
+            -var="proxmox_host=${{ env.proxmox_host }}" \
+            -var="proxmox_user=${{ env.proxmox_user }}" \
+            -var="proxmox_password=${{ env.proxmox_password }}" \
+            -var="proxmox_node=${{ env.proxmox_node }}" \
+            -var-file="../config/terraform.tfvars" \
+            -out=tfplan
+          
+      - name: Upload Terraform Plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan
+          path: infrastructure/terraform/tfplan
+
+  deploy:
+    needs: [validate, plan]
+    runs-on: ubuntu-latest
+    if: github.event.inputs.action == 'deploy' || github.event_name == 'push'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        
+      - name: Download Terraform Plan
+        uses: actions/download-artifact@v4
+        with:
+          name: terraform-plan
+          path: infrastructure/terraform
+          
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          
+      - name: Configure Proxmox credentials
+        run: |
+          echo "proxmox_host=${{ secrets.PROXMOX_HOST }}" >> $GITHUB_ENV
+          echo "proxmox_user=${{ secrets.PROXMOX_USER }}" >> $GITHUB_ENV
+          echo "proxmox_password=${{ env.PROXMOX_PASSWORD }}" >> $GITHUB_ENV
+          echo "proxmox_node=${{ secrets.PROXMOX_NODE }}" >> $GITHUB_ENV
+          
+      - name: Terraform Apply
+        run: |
+          cd infrastructure/terraform
+          terraform apply tfplan
+          
+      - name: Setup Ansible
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          sudo apt-add-repository --yes --update ppa:ansible/ansible
+          sudo apt-get install -y ansible
+          
+      - name: Configure SSH for Ansible
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ env.proxmox_host }} >> ~/.ssh/known_hosts
+          
+      - name: Run Ansible Playbooks
+        run: |
+          cd infrastructure/ansible
+          ansible-playbook -i inventory/inventory.py site.yml \
+            -e @../config/ansible-vars.yml \
+            --extra-vars "ansible_ssh_private_key_file=~/.ssh/id_rsa"
+            
+      - name: Deployment Summary
+        run: |
+          echo "🚀 AI Infrastructure deployment completed!"
+          echo "📊 Infrastructure summary:"
+          cd infrastructure/terraform
+          terraform output infrastructure_summary
+
+  destroy:
+    needs: validate
+    runs-on: ubuntu-latest
+    if: github.event.inputs.action == 'destroy'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          
+      - name: Configure Proxmox credentials
+        run: |
+          echo "proxmox_host=${{ secrets.PROXMOX_HOST }}" >> $GITHUB_ENV
+          echo "proxmox_user=${{ secrets.PROXMOX_USER }}" >> $GITHUB_ENV
+          echo "proxmox_password=${{ secrets.PROXMOX_PASSWORD }}" >> $GITHUB_ENV
+          echo "proxmox_node=${{ secrets.PROXMOX_NODE }}" >> $GITHUB_ENV
+          
+      - name: Terraform Init
+        run: |
+          cd infrastructure/terraform
+          terraform init
+          
+      - name: Terraform Destroy
+        run: |
+          cd infrastructure/terraform
+          terraform destroy \
+            -var="proxmox_host=${{ env.proxmox_host }}" \
+            -var="proxmox_user=${{ env.proxmox_user }}" \
+            -var="proxmox_password=${{ env.proxmox_password }}" \
+            -var="proxmox_node=${{ env.proxmox_node }}" \
+            -var-file="../config/terraform.tfvars" \
+            -auto-approve
