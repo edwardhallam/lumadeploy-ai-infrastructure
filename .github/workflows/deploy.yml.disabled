@@ -1,9 +1,7 @@
 name: Deploy AI Infrastructure
 
 on:
-  push:
-    branches: [main]
-    paths: ['infrastructure/config/**', 'infrastructure/terraform/**', 'infrastructure/ansible/**']
+  # Only run on manual trigger or when someone explicitly wants to deploy
   workflow_dispatch:
     inputs:
       action:
@@ -15,6 +13,7 @@ on:
         - deploy
         - destroy
         - plan
+        - validate-only
 
 env:
   TF_VERSION: '1.7.0'
@@ -26,6 +25,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
+        
+      - name: Check for required configuration
+        run: |
+          if [ ! -f "infrastructure/config/terraform.tfvars" ]; then
+            echo "❌ Required configuration file not found: infrastructure/config/terraform.tfvars"
+            echo "💡 Please run setup.sh first to generate your configuration files"
+            echo "💡 Or use the 'validate-only' action to check syntax without deployment"
+            exit 1
+          fi
+          echo "✅ Configuration files found, proceeding with validation"
         
       - name: Validate Terraform configuration
         uses: hashicorp/setup-terraform@v3
@@ -49,10 +58,44 @@ jobs:
           ansible-playbook --version
           ansible-playbook --syntax-check site.yml
 
+  validate-only:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.action == 'validate-only'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        
+      - name: Validate Terraform syntax only
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          
+      - name: Terraform Format Check
+        run: |
+          cd infrastructure/terraform
+          terraform fmt -check
+          
+      - name: Terraform Validate (syntax only)
+        run: |
+          cd infrastructure/terraform
+          terraform init
+          terraform validate
+          
+      - name: Validate Ansible playbooks (syntax only)
+        run: |
+          cd infrastructure/ansible
+          ansible-playbook --version
+          ansible-playbook --syntax-check site.yml
+          
+      - name: Validation Complete
+        run: |
+          echo "✅ All syntax validation passed!"
+          echo "💡 To deploy infrastructure, run setup.sh and then use the 'deploy' action"
+
   plan:
     needs: validate
     runs-on: ubuntu-latest
-    if: github.event.inputs.action == 'plan' || github.event_name == 'push'
+    if: github.event.inputs.action == 'plan'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -94,7 +137,7 @@ jobs:
   deploy:
     needs: [validate, plan]
     runs-on: ubuntu-latest
-    if: github.event.inputs.action == 'deploy' || github.event_name == 'push'
+    if: github.event.inputs.action == 'deploy'
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
