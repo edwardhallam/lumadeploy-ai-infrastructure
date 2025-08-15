@@ -6,134 +6,190 @@ provider "proxmox" {
   pm_tls_insecure     = true # Set to false in production with proper certificates
 }
 
-# Create LXC container for LibreChat
-resource "proxmox_lxc" "librechat" {
+# Create K3s Master/Control Plane VM
+resource "proxmox_vm_qemu" "k3s_master" {
+  name        = "k3s-master"
   target_node = var.proxmox_node
-  hostname    = var.librechat_container_name
-  ostemplate  = "local:vztmpl/ubuntu-22.04-standard_22.04-1_amd64.tar.zst"
+  vmid        = 200
 
-  cores  = var.container_cpu_limit
-  memory = var.container_memory_limit
-  swap   = var.container_memory_limit / 2
+  # VM Configuration
+  cores   = var.k3s_master_cpu
+  memory  = var.k3s_master_memory
+  sockets = 1
 
-  rootfs {
+  # Disk Configuration
+  disk {
+    slot    = 0
+    type    = "virtio"
     storage = var.storage_pool
-    size    = "${var.container_storage_limit}G"
+    size    = "${var.k3s_master_storage}G"
+    format  = "qcow2"
   }
 
+  # Network Configuration
   network {
-    name   = "eth0"
+    model  = "virtio"
     bridge = "vmbr0"
-    ip     = cidrhost(var.network_subnet, 10) # Assign IP from subnet
-    gw     = var.network_gateway
   }
 
-  nameserver = join(" ", var.dns_servers)
+  # OS Configuration
+  clone      = var.vm_template
+  os_type    = "cloud-init"
+  ciuser     = var.vm_user
+  cipassword = var.vm_password
 
-  # SSH access for Ansible (commented out for now - will be configured via Ansible)
-  # ssh_public_keys = file("~/.ssh/id_rsa.pub")
+  # Cloud-init configuration
+  nameserver   = join(" ", var.dns_servers)
+  searchdomain = var.search_domain
+  ipconfig0    = "ip=${cidrhost(var.network_subnet, 20)}/24,gw=${var.network_gateway}"
 
-  # Start container after creation
-  start = true
+  # SSH Keys
+  sshkeys = var.ssh_public_key
 
-  tags = "ai-infrastructure,librechat"
+  # Start VM after creation
+  startup = "order=1,up=30"
+
+  # Tags
+  tags = "k3s,master,ai-infrastructure"
 }
 
-# Create LXC container for MCP Server
-resource "proxmox_lxc" "mcp_server" {
+# Create K3s Worker Node 1
+resource "proxmox_vm_qemu" "k3s_worker1" {
+  name        = "k3s-worker1"
   target_node = var.proxmox_node
-  hostname    = var.mcp_server_container_name
-  ostemplate  = "local:vztmpl/ubuntu-22.04-standard_22.04-1_amd64.tar.zst"
+  vmid        = 201
 
-  cores  = var.container_cpu_limit
-  memory = var.container_memory_limit
-  swap   = var.container_memory_limit / 2
+  # VM Configuration
+  cores   = var.k3s_worker_cpu
+  memory  = var.k3s_worker_memory
+  sockets = 1
 
-  rootfs {
+  # Disk Configuration
+  disk {
+    slot    = 0
+    type    = "virtio"
     storage = var.storage_pool
-    size    = "${var.container_storage_limit}G"
+    size    = "${var.k3s_worker_storage}G"
+    format  = "qcow2"
   }
 
+  # Network Configuration
   network {
-    name   = "eth0"
+    model  = "virtio"
     bridge = "vmbr0"
-    ip     = cidrhost(var.network_subnet, 11) # Assign IP from subnet
-    gw     = var.network_gateway
   }
 
-  nameserver = join(" ", var.dns_servers)
+  # OS Configuration
+  clone      = var.vm_template
+  os_type    = "cloud-init"
+  ciuser     = var.vm_user
+  cipassword = var.vm_password
 
-  # SSH access for Ansible (commented out for now - will be configured via Ansible)
-  # ssh_public_keys = file("~/.ssh/id_rsa.pub")
+  # Cloud-init configuration
+  nameserver   = join(" ", var.dns_servers)
+  searchdomain = var.search_domain
+  ipconfig0    = "ip=${cidrhost(var.network_subnet, 21)}/24,gw=${var.network_gateway}"
 
-  # Start container after creation
-  start = true
+  # SSH Keys
+  sshkeys = var.ssh_public_key
 
-  tags = "ai-infrastructure,mcp-server"
+  # Start VM after creation
+  startup = "order=2,up=30"
+
+  # Tags
+  tags = "k3s,worker,ai-infrastructure"
 }
 
-# Create LXC container for monitoring/logging
-resource "proxmox_lxc" "monitoring" {
+# Create K3s Worker Node 2
+resource "proxmox_vm_qemu" "k3s_worker2" {
+  name        = "k3s-worker2"
   target_node = var.proxmox_node
-  hostname    = "monitoring"
-  ostemplate  = "local:vztmpl/ubuntu-22.04-standard_22.04-1_amd64.tar.zst"
+  vmid        = 202
 
-  cores  = 1
-  memory = 2048
-  swap   = 1024
+  # VM Configuration
+  cores   = var.k3s_worker_cpu
+  memory  = var.k3s_worker_memory
+  sockets = 1
 
-  rootfs {
+  # Disk Configuration
+  disk {
+    slot    = 0
+    type    = "virtio"
     storage = var.storage_pool
-    size    = "10G"
+    size    = "${var.k3s_worker_storage}G"
+    format  = "qcow2"
   }
 
+  # Network Configuration
   network {
-    name   = "eth0"
+    model  = "virtio"
     bridge = "vmbr0"
-    ip     = cidrhost(var.network_subnet, 12) # Assign IP from subnet
-    gw     = var.network_gateway
   }
 
-  nameserver = join(" ", var.dns_servers)
+  # OS Configuration
+  clone      = var.vm_template
+  os_type    = "cloud-init"
+  ciuser     = var.vm_user
+  cipassword = var.vm_password
 
-  # SSH access for Ansible (commented out for now - will be configured via Ansible)
-  # ssh_public_keys = file("~/.ssh/id_rsa.pub")
+  # Cloud-init configuration
+  nameserver   = join(" ", var.dns_servers)
+  searchdomain = var.search_domain
+  ipconfig0    = "ip=${cidrhost(var.network_subnet, 22)}/24,gw=${var.network_gateway}"
 
-  # Start container after creation
-  start = true
+  # SSH Keys
+  sshkeys = var.ssh_public_key
 
-  tags = "ai-infrastructure,monitoring"
+  # Start VM after creation
+  startup = "order=2,up=30"
+
+  # Tags
+  tags = "k3s,worker,ai-infrastructure"
 }
 
-# Create LXC container for reverse proxy/load balancer
-resource "proxmox_lxc" "reverse_proxy" {
+# Create HAProxy Load Balancer VM
+resource "proxmox_vm_qemu" "k3s_loadbalancer" {
+  name        = "k3s-lb"
   target_node = var.proxmox_node
-  hostname    = "reverse-proxy"
-  ostemplate  = "local:vztmpl/ubuntu-22.04-standard_22.04-1_amd64.tar.zst"
+  vmid        = 199
 
-  cores  = 1
-  memory = 1024
-  swap   = 512
+  # VM Configuration
+  cores   = var.k3s_lb_cpu
+  memory  = var.k3s_lb_memory
+  sockets = 1
 
-  rootfs {
+  # Disk Configuration
+  disk {
+    slot    = 0
+    type    = "virtio"
     storage = var.storage_pool
-    size    = "5G"
+    size    = "${var.k3s_lb_storage}G"
+    format  = "qcow2"
   }
 
+  # Network Configuration
   network {
-    name   = "eth0"
+    model  = "virtio"
     bridge = "vmbr0"
-    ip     = cidrhost(var.network_subnet, 13) # Assign IP from subnet
-    gw     = var.network_gateway
   }
 
-  nameserver = join(" ", var.dns_servers)
+  # OS Configuration
+  clone      = var.vm_template
+  os_type    = "cloud-init"
+  ciuser     = var.vm_user
+  cipassword = var.vm_password
 
-  # SSH access for Ansible (commented out for now - will be configured via Ansible)
-  # ssh_public_keys = file("~/.ssh/id_rsa.pub")
+  # Cloud-init configuration
+  nameserver   = join(" ", var.dns_servers)
+  searchdomain = var.search_domain
+  ipconfig0    = "ip=${cidrhost(var.network_subnet, 15)}/24,gw=${var.network_gateway}"
 
-  # Start container after creation
-  start = true
+  # SSH Keys
+  sshkeys = var.ssh_public_key
 
-  tags = "ai-infrastructure,reverse-proxy"
+  # Start VM after creation
+  startup = "order=0,up=30"
+
+  # Tags
+  tags = "k3s,loadbalancer,haproxy,ai-infrastructure"
 }
