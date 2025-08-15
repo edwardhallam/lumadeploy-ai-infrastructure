@@ -152,23 +152,94 @@ check_actions_status() {
     fi
 }
 
-# Wait for running workflows to complete (optional)
+# Wait for workflows to start (dynamic detection)
+wait_for_workflows_to_start() {
+    local max_wait=60  # Maximum 60 seconds to wait for workflows to start
+    local wait_time=0
+    local check_interval=2
+    
+    print_status "Waiting for GitHub Actions workflows to start..."
+    
+    while [ $wait_time -lt $max_wait ]; do
+        # Check if any workflows exist for this commit
+        local workflow_count=$(gh api repos/$REPO/actions/runs --jq ".workflow_runs[] | select(.head_sha == \"$COMMIT_SHA\")" | wc -l | tr -d ' ')
+        
+        if [ "$workflow_count" -gt 0 ]; then
+            print_success "Found $workflow_count workflow(s) for commit $SHORT_SHA"
+            return 0
+        fi
+        
+        printf "\r⏳ Waiting for workflows to start... ${wait_time}s/${max_wait}s"
+        sleep $check_interval
+        wait_time=$((wait_time + check_interval))
+    done
+    
+    echo ""
+    print_warning "No workflows started within ${max_wait} seconds"
+    print_status "This might be normal if no workflows are configured for this push"
+    return 1
+}
+
+# Wait for running workflows to complete with progress tracking
 wait_for_completion() {
     if [ "$1" = "--wait" ]; then
-        print_status "Waiting for running workflows to complete..."
+        print_status "Monitoring workflows until completion..."
+        
+        local last_status=""
+        local start_time=$(date +%s)
         
         while true; do
-            RUNNING=$(gh api repos/$REPO/actions/runs --jq ".workflow_runs[] | select(.head_sha == \"$COMMIT_SHA\" and .status != \"completed\")" | wc -l | tr -d ' ')
+            # Get current workflow status
+            local runs_data=$(gh api repos/$REPO/actions/runs --jq ".workflow_runs[] | select(.head_sha == \"$COMMIT_SHA\")")
             
-            if [ "$RUNNING" -eq 0 ]; then
-                print_success "All workflows completed!"
+            if [ -z "$runs_data" ]; then
+                print_warning "No workflows found for this commit"
                 break
             fi
             
-            print_status "Still running: $RUNNING workflow(s)..."
-            sleep 10
+            # Count workflows by status
+            local total=$(echo "$runs_data" | jq -s 'length')
+            local completed=$(echo "$runs_data" | jq -s 'map(select(.status == "completed")) | length')
+            local running=$(echo "$runs_data" | jq -s 'map(select(.status == "in_progress")) | length')
+            local queued=$(echo "$runs_data" | jq -s 'map(select(.status == "queued")) | length')
+            local success=$(echo "$runs_data" | jq -s 'map(select(.conclusion == "success")) | length')
+            local failed=$(echo "$runs_data" | jq -s 'map(select(.conclusion == "failure")) | length')
+            
+            # Create status summary
+            local current_status="Total: $total | Completed: $completed | Running: $running | Queued: $queued | Success: $success | Failed: $failed"
+            
+            # Only print if status changed
+            if [ "$current_status" != "$last_status" ]; then
+                local elapsed=$(($(date +%s) - start_time))
+                printf "\r🔄 [${elapsed}s] $current_status"
+                
+                # Show individual workflow status if there are active workflows
+                if [ "$running" -gt 0 ] || [ "$queued" -gt 0 ]; then
+                    echo ""
+                    echo "$runs_data" | jq -r 'select(.status != "completed") | "   \(.status | ascii_upcase): \(.name)"' | head -3
+                    if [ "$(echo "$runs_data" | jq -s 'map(select(.status != "completed")) | length')" -gt 3 ]; then
+                        echo "   ... and $(($(echo "$runs_data" | jq -s 'map(select(.status != "completed")) | length') - 3)) more"
+                    fi
+                fi
+                
+                last_status="$current_status"
+            fi
+            
+            # Check if all workflows are completed
+            if [ "$running" -eq 0 ] && [ "$queued" -eq 0 ]; then
+                echo ""
+                if [ "$failed" -gt 0 ]; then
+                    print_error "✗ All workflows completed with $failed failure(s)"
+                else
+                    print_success "✓ All workflows completed successfully"
+                fi
+                break
+            fi
+            
+            sleep 3  # Check every 3 seconds for responsive updates
         done
         
+        echo ""
         # Check final status
         check_actions_status
     fi
@@ -202,22 +273,46 @@ main() {
     get_commit_info
     
     echo ""
-    if ! check_actions_status; then
-        # Actions failed, but still show summary
-        show_summary
-        echo ""
-        print_error "GitHub Actions check failed!"
-        exit 1
-    fi
     
-    # Wait for completion if requested
-    wait_for_completion "$1"
+    # Handle different wait modes
+    case "$1" in
+        "--smart-wait")
+            # Smart wait: detect workflow startup, then monitor to completion
+            if wait_for_workflows_to_start; then
+                print_status "Workflows detected, monitoring progress..."
+                wait_for_completion "--wait"
+            else
+                # No workflows started, just check current status
+                if ! check_actions_status; then
+                    show_summary
+                    echo ""
+                    print_error "GitHub Actions check failed!"
+                    exit 1
+                fi
+            fi
+            ;;
+        "--wait")
+            # Traditional wait: monitor existing workflows to completion
+            wait_for_completion "--wait"
+            ;;
+        *)
+            # Default: just check current status
+            if ! check_actions_status; then
+                # Actions failed, but still show summary
+                show_summary
+                echo ""
+                print_error "GitHub Actions check failed!"
+                exit 1
+            fi
+            ;;
+    esac
     
     show_summary
     
     echo ""
     print_success "GitHub Actions status check complete!"
     print_status "💡 Run with --wait to wait for running workflows to finish"
+    print_status "💡 Run with --smart-wait to detect startup and monitor to completion"
     print_status "💡 Add to git hooks with: ln -s ../../scripts/check-github-actions.sh .git/hooks/post-push"
 }
 
