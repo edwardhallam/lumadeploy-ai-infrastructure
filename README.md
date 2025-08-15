@@ -251,4 +251,4 @@ MIT License - Use LumaDeploy for personal, commercial, or educational purposes.
 
 **🚀 Ready to build your AI infrastructure? Clone LumaDeploy and ask Cursor to get started!**
 
-*LumaDeploy AI Service Builder - Where Infrastructure Meets Intelligence* ✨
+*LumaDeploy AI Service Builder - Where Infrastructure Meets Intelligence* ✨# Pre-commit hooks simplified successfully
