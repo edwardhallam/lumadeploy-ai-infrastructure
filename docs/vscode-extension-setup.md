@@ -107,11 +107,11 @@ Complete guide to leveraging VS Code extensions for enhanced GitHub Actions moni
   "yaml.schemas": {
     "https://json.schemastore.org/github-workflow.json": ".github/workflows/*.yml"
   },
-  
+
   // Terraform support
   "terraform.format.enable": true,
   "terraform.validate.enable": true,
-  
+
   // Kubernetes integration
   "kubernetes.fileAssociations": [
     {
@@ -120,7 +120,7 @@ Complete guide to leveraging VS Code extensions for enhanced GitHub Actions moni
       "kind": "*"
     }
   ],
-  
+
   // Auto-formatting on save
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {

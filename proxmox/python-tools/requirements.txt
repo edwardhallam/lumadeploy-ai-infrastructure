@@ -10,4 +10,3 @@ pytest-mock>=3.10.0
 mypy>=1.0.0
 types-requests>=2.31.0
 pydantic>=2.0.0
-

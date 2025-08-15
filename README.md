@@ -9,7 +9,7 @@ Transform your Proxmox environment into a powerful AI infrastructure platform wi
 LumaDeploy is a comprehensive AI infrastructure platform that provides:
 
 - **🤖 Cursor-Guided Setup** - AI assistant walks you through every step
-- **🏗️ Infrastructure as Code** - Professional Terraform + Ansible automation  
+- **🏗️ Infrastructure as Code** - Professional Terraform + Ansible automation
 - **☸️ Kubernetes-Ready** - Modern K3s cluster with auto-scaling
 - **🧠 AI Services** - Ollama, LibreChat, MCP Servers out-of-the-box
 - **🔐 Security-First** - Automated secret detection and protection
@@ -34,7 +34,7 @@ Open in Cursor IDE and ask:
 Cursor will guide you through:
 
 - Hardware requirements assessment
-- Proxmox connection configuration  
+- Proxmox connection configuration
 - Network and resource planning
 - Service selection and customization
 - Deployment and monitoring setup
@@ -87,6 +87,7 @@ make status    # Monitor deployment progress
 - **Cursor Integration** - AI-guided setup and troubleshooting
 - **GitOps Workflow** - Professional deployment with audit trails
 - **Hot Reloading** - Fast development and testing cycles
+- **Code Quality** - Pre-commit hooks for consistent formatting and validation
 - **Comprehensive Docs** - Everything you need to know
 
 ### **Production Ready**
@@ -168,6 +169,30 @@ lumadeploy-ai-infrastructure/
 - **Private AI Cloud** - On-premises AI infrastructure with enterprise security
 - **Compliance Ready** - Audit trails, access control, and data governance
 - **Cost Optimization** - Efficient resource utilization and scaling
+
+## 🎯 **Code Quality & Standards**
+
+LumaDeploy maintains high code quality through automated validation:
+
+### **Pre-commit Hooks**
+
+- **Terraform Validation** - Syntax, formatting, and best practices
+- **YAML/JSON Validation** - Kubernetes manifests and configuration files
+- **Python Code Quality** - Black formatting and Flake8 linting
+- **Shell Script Validation** - Security and syntax checking
+- **Ansible Validation** - Playbook syntax and best practices
+
+### **Automated Quality Gates**
+
+- **Local Validation** - Pre-commit hooks catch issues before commit
+- **CI/CD Validation** - GitHub Actions ensure remote repository quality
+- **Dual Protection** - Quality checks at multiple stages
+
+### **Setup Code Quality Tools**
+
+```bash
+make setup-pre-commit  # Install and configure pre-commit hooks
+```
 
 ## 🤖 **Cursor Integration**
 

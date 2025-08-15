@@ -32,7 +32,7 @@ jobs:
         echo "Commit: ${{ steps.workflow.outputs.commit_sha }}"
         echo "Actor: ${{ steps.workflow.outputs.actor }}"
         echo "URL: ${{ steps.workflow.outputs.workflow_url }}"
-        
+
         # Create notification file for external monitoring
         cat > /tmp/workflow_notification.json << EOF
         {
@@ -63,7 +63,7 @@ jobs:
         echo "Branch: ${{ steps.workflow.outputs.branch }}"
         echo "Commit: ${{ steps.workflow.outputs.commit_sha }}"
         echo "URL: ${{ steps.workflow.outputs.workflow_url }}"
-        
+
         # Create success notification
         cat > /tmp/workflow_notification.json << EOF
         {
@@ -87,7 +87,7 @@ jobs:
         echo "Branch: ${{ steps.workflow.outputs.branch }}"
         echo "Commit: ${{ steps.workflow.outputs.commit_sha }}"
         echo "URL: ${{ steps.workflow.outputs.workflow_url }}"
-        
+
         # Create failure notification
         cat > /tmp/workflow_notification.json << EOF
         {

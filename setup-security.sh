@@ -57,7 +57,7 @@ if command -v git-secrets &> /dev/null; then
     print_success "git-secrets is already installed"
 else
     print_status "Installing git-secrets..."
-    
+
     # Detect OS and install accordingly
     if [[ "$OSTYPE" == "darwin"* ]]; then
         # macOS

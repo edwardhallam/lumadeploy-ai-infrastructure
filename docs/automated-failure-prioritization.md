@@ -157,7 +157,7 @@ Edit `scripts/auto-prioritize-failures.sh` to:
 create_failure_todo() {
     local workflow_name="$1"
     local workflow_url="$2"
-    
+
     # Create Jira ticket
     curl -X POST \
         -H "Content-Type: application/json" \

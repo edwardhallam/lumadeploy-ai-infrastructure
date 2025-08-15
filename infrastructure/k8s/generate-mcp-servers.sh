@@ -17,9 +17,9 @@ echo "🚀 Generating $MCP_SERVER_COUNT MCP server deployments..."
 for i in $(seq 1 $MCP_SERVER_COUNT); do
     SERVER_NAME="mcp-server-$i"
     OUTPUT_FILE="$OUTPUT_DIR/${SERVER_NAME}.yaml"
-    
+
     echo "📝 Generating $SERVER_NAME..."
-    
+
     cat > "$OUTPUT_FILE" << EOF
 ---
 # MCP Server $i Deployment
@@ -155,7 +155,7 @@ data:
     const express = require('express');
     const cors = require('cors');
     const winston = require('winston');
-    
+
     // Configure logging
     const logger = winston.createLogger({
       level: process.env.LOG_LEVEL || 'info',
@@ -173,17 +173,17 @@ data:
         })
       ]
     });
-    
+
     const app = express();
     const port = process.env.MCP_SERVER_PORT || 3000;
     const serverName = process.env.MCP_SERVER_NAME || '$SERVER_NAME';
     const serverId = process.env.MCP_SERVER_ID || '$i';
-    
+
     // Middleware
     app.use(cors());
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
-    
+
     // Request logging
     app.use((req, res, next) => {
       logger.info(\`\${req.method} \${req.path}\`, {
@@ -192,7 +192,7 @@ data:
       });
       next();
     });
-    
+
     // Health check endpoints
     app.get('/health', (req, res) => {
       res.json({
@@ -203,7 +203,7 @@ data:
         uptime: process.uptime()
       });
     });
-    
+
     app.get('/ready', (req, res) => {
       res.json({
         status: 'ready',
@@ -212,7 +212,7 @@ data:
         timestamp: new Date().toISOString()
       });
     });
-    
+
     // MCP Protocol endpoints
     app.get('/mcp/info', (req, res) => {
       res.json({
@@ -231,7 +231,7 @@ data:
         }
       });
     });
-    
+
     app.post('/mcp/initialize', (req, res) => {
       logger.info('MCP Server initialized', { request: req.body });
       res.json({
@@ -248,13 +248,13 @@ data:
         }
       });
     });
-    
+
     // Sample MCP tool
     app.post('/mcp/tools/call', (req, res) => {
       const { name, arguments: args } = req.body;
-      
+
       logger.info('Tool called', { name, args });
-      
+
       switch (name) {
         case 'echo':
           res.json({
@@ -266,7 +266,7 @@ data:
             ]
           });
           break;
-          
+
         case 'server-info':
           res.json({
             content: [
@@ -277,7 +277,7 @@ data:
             ]
           });
           break;
-          
+
         default:
           res.status(400).json({
             error: {
@@ -287,7 +287,7 @@ data:
           });
       }
     });
-    
+
     // List available tools
     app.get('/mcp/tools/list', (req, res) => {
       res.json({
@@ -316,7 +316,7 @@ data:
         ]
       });
     });
-    
+
     // Error handling
     app.use((error, req, res, next) => {
       logger.error('Unhandled error', error);
@@ -327,7 +327,7 @@ data:
         }
       });
     });
-    
+
     // 404 handler
     app.use((req, res) => {
       res.status(404).json({
@@ -337,18 +337,18 @@ data:
         }
       });
     });
-    
+
     // Start server
     app.listen(port, '0.0.0.0', () => {
       logger.info(\`MCP Server \${serverName} listening on port \${port}\`);
     });
-    
+
     // Graceful shutdown
     process.on('SIGTERM', () => {
       logger.info('SIGTERM received, shutting down gracefully');
       process.exit(0);
     });
-    
+
     process.on('SIGINT', () => {
       logger.info('SIGINT received, shutting down gracefully');
       process.exit(0);

@@ -36,7 +36,7 @@ librechat:
   admin_email: "admin@your-domain.com"
   app_title: "LumaDeploy AI Chat"
   custom_footer: "Powered by LumaDeploy"
-  
+
 # MCP Servers Configuration
 mcp_servers:
   count: 5
@@ -78,7 +78,7 @@ security:
     - "ubuntu"
     - "your-username"
   fail2ban_enabled: true
-  
+
 # Backup Configuration
 backup:
   enabled: true

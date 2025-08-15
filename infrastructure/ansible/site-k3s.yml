@@ -4,19 +4,19 @@
   hosts: all
   become: true
   gather_facts: true
-  
+
   vars:
     ansible_python_interpreter: /usr/bin/python3
     k3s_version: "{{ k3s_version | default('v1.28.5+k3s1') }}"
     k3s_token: "{{ k3s_token }}"
     k3s_server_ip: "{{ hostvars[groups['k3s_master'][0]]['ansible_host'] }}"
-    
+
   pre_tasks:
     - name: Update apt cache
       apt:
         update_cache: yes
         cache_valid_time: 3600
-        
+
     - name: Install essential packages
       apt:
         name:
@@ -30,7 +30,7 @@
           - open-iscsi
           - nfs-common
         state: present
-        
+
     - name: Configure firewall for K3s
       ufw:
         state: enabled
@@ -46,7 +46,7 @@
         - '10250'  # kubelet
         - '10251'  # kube-scheduler
         - '10252'  # kube-controller-manager
-        
+
     - name: Allow K3s UDP ports
       ufw:
         rule: allow
@@ -54,19 +54,19 @@
         proto: udp
       loop:
         - '8472'   # flannel VXLAN
-        
+
     - name: Disable swap
       shell: |
         swapoff -a
         sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
-      
+
     - name: Load required kernel modules
       modprobe:
         name: "{{ item }}"
       loop:
         - br_netfilter
         - overlay
-        
+
     - name: Make kernel modules persistent
       lineinfile:
         path: /etc/modules-load.d/k3s.conf
@@ -75,7 +75,7 @@
       loop:
         - br_netfilter
         - overlay
-        
+
     - name: Configure sysctl for K3s
       sysctl:
         name: "{{ item.key }}"
@@ -92,18 +92,18 @@
 - name: Install K3s master
   hosts: k3s_master
   become: true
-  
+
   vars:
     k3s_cluster_cidr: "{{ k3s_cluster_cidr | default('10.42.0.0/16') }}"
     k3s_service_cidr: "{{ k3s_service_cidr | default('10.43.0.0/16') }}"
-    
+
   tasks:
     - name: Download K3s installation script
       get_url:
         url: https://get.k3s.io
         dest: /tmp/k3s-install.sh
         mode: '0755'
-        
+
     - name: Install K3s server
       shell: |
         INSTALL_K3S_VERSION="{{ k3s_version }}" \
@@ -117,13 +117,13 @@
           --write-kubeconfig-mode 644
       args:
         creates: /usr/local/bin/k3s
-        
+
     - name: Wait for K3s to be ready
       wait_for:
         port: 6443
         host: "{{ ansible_host }}"
         timeout: 300
-        
+
     - name: Create .kube directory
       file:
         path: /home/{{ ansible_user }}/.kube
@@ -131,7 +131,7 @@
         owner: "{{ ansible_user }}"
         group: "{{ ansible_user }}"
         mode: '0755'
-        
+
     - name: Copy kubeconfig to user directory
       copy:
         src: /etc/rancher/k3s/k3s.yaml
@@ -140,7 +140,7 @@
         group: "{{ ansible_user }}"
         mode: '0600'
         remote_src: yes
-        
+
     - name: Update kubeconfig server address
       replace:
         path: /home/{{ ansible_user }}/.kube/config
@@ -151,14 +151,14 @@
 - name: Install K3s workers
   hosts: k3s_workers
   become: true
-  
+
   tasks:
     - name: Download K3s installation script
       get_url:
         url: https://get.k3s.io
         dest: /tmp/k3s-install.sh
         mode: '0755'
-        
+
     - name: Install K3s agent
       shell: |
         INSTALL_K3S_VERSION="{{ k3s_version }}" \
@@ -167,7 +167,7 @@
         /tmp/k3s-install.sh agent
       args:
         creates: /usr/local/bin/k3s
-        
+
     - name: Wait for K3s agent to be ready
       wait_for:
         port: 10250
@@ -178,26 +178,26 @@
 - name: Configure load balancer
   hosts: k3s_loadbalancer
   become: true
-  
+
   tasks:
     - name: Install HAProxy
       apt:
         name: haproxy
         state: present
-        
+
     - name: Configure HAProxy for K3s
       template:
         src: haproxy.cfg.j2
         dest: /etc/haproxy/haproxy.cfg
         backup: yes
       notify: restart haproxy
-      
+
     - name: Start and enable HAProxy
       systemd:
         name: haproxy
         state: started
         enabled: yes
-        
+
   handlers:
     - name: restart haproxy
       systemd:
@@ -208,14 +208,14 @@
 - name: Install K3s addons
   hosts: k3s_master
   become: false
-  
+
   tasks:
     - name: Install Helm
       shell: |
         curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
       args:
         creates: /usr/local/bin/helm
-        
+
     - name: Add Helm repositories
       kubernetes.core.helm_repository:
         name: "{{ item.name }}"
@@ -224,7 +224,7 @@
         - { name: 'ingress-nginx', url: 'https://kubernetes.github.io/ingress-nginx' }
         - { name: 'prometheus-community', url: 'https://prometheus-community.github.io/helm-charts' }
         - { name: 'jetstack', url: 'https://charts.jetstack.io' }
-        
+
     - name: Install NGINX Ingress Controller
       kubernetes.core.helm:
         name: ingress-nginx
@@ -238,7 +238,7 @@
               nodePorts:
                 http: 30080
                 https: 30443
-                
+
     - name: Install cert-manager
       kubernetes.core.helm:
         name: cert-manager
@@ -247,14 +247,14 @@
         create_namespace: yes
         values:
           installCRDs: true
-          
+
     - name: Install Longhorn storage
       kubernetes.core.helm:
         name: longhorn
         chart_ref: https://charts.longhorn.io/longhorn-1.5.3.tgz
         release_namespace: longhorn-system
         create_namespace: yes
-        
+
     - name: Wait for ingress controller to be ready
       kubernetes.core.k8s_info:
         api_version: apps/v1

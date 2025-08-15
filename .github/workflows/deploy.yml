@@ -25,7 +25,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
-        
+
       - name: Check for required configuration
         run: |
           if [ "${{ github.event.inputs.action }}" != "validate-only" ] && [ ! -f "config/terraform.tfvars" ]; then
@@ -35,23 +35,23 @@ jobs:
             exit 1
           fi
           echo "✅ Configuration check passed"
-        
+
       - name: Validate Terraform configuration
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
-          
+
       - name: Terraform Format Check
         run: |
           cd terraform
           terraform fmt -check
-          
+
       - name: Terraform Validate
         run: |
           cd terraform
           terraform init -backend=false
           terraform validate
-          
+
       - name: Validate Ansible playbooks
         run: |
           sudo apt-get update
@@ -66,23 +66,23 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
-        
+
       - name: Validate Terraform syntax only
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
-          
+
       - name: Terraform Format Check
         run: |
           cd terraform
           terraform fmt -check
-          
+
       - name: Terraform Validate (syntax only)
         run: |
           cd terraform
           terraform init -backend=false
           terraform validate
-          
+
       - name: Validate Ansible playbooks (syntax only)
         run: |
           sudo apt-get update
@@ -90,7 +90,7 @@ jobs:
           cd infrastructure/ansible
           ansible-playbook --version
           ansible-playbook --syntax-check site.yml
-          
+
       - name: Validation Complete
         run: |
           echo "✅ All syntax validation passed!"
@@ -103,24 +103,24 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
-        
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
-          
+
       - name: Configure Proxmox credentials
         run: |
           echo "proxmox_host=${{ secrets.PROXMOX_HOST }}" >> $GITHUB_ENV
           echo "proxmox_user=${{ secrets.PROXMOX_USER }}" >> $GITHUB_ENV
           echo "proxmox_password=${{ secrets.PROXMOX_PASSWORD }}" >> $GITHUB_ENV
           echo "proxmox_node=${{ secrets.PROXMOX_NODE }}" >> $GITHUB_ENV
-          
+
       - name: Terraform Init
         run: |
           cd terraform
           terraform init
-          
+
       - name: Terraform Plan
         run: |
           cd terraform
@@ -131,7 +131,7 @@ jobs:
             -var="proxmox_node=${{ env.proxmox_node }}" \
             -var-file="../config/terraform.tfvars" \
             -out=tfplan
-          
+
       - name: Upload Terraform Plan
         uses: actions/upload-artifact@v4
         with:
@@ -145,51 +145,51 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
-        
+
       - name: Download Terraform Plan
         uses: actions/download-artifact@v4
         with:
           name: terraform-plan
           path: terraform
-          
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
-          
+
       - name: Configure Proxmox credentials
         run: |
           echo "proxmox_host=${{ secrets.PROXMOX_HOST }}" >> $GITHUB_ENV
           echo "proxmox_user=${{ secrets.PROXMOX_USER }}" >> $GITHUB_ENV
           echo "proxmox_password=${{ secrets.PROXMOX_PASSWORD }}" >> $GITHUB_ENV
           echo "proxmox_node=${{ secrets.PROXMOX_NODE }}" >> $GITHUB_ENV
-          
+
       - name: Terraform Apply
         run: |
           cd terraform
           terraform apply tfplan
-          
+
       - name: Setup Ansible
         run: |
           sudo apt-get update
           sudo apt-get install -y software-properties-common
           sudo apt-add-repository --yes --update ppa:ansible/ansible
           sudo apt-get install -y ansible
-          
+
       - name: Configure SSH for Ansible
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ env.proxmox_host }} >> ~/.ssh/known_hosts
-          
+
       - name: Run Ansible Playbooks
         run: |
           cd infrastructure/ansible
           ansible-playbook -i inventory/inventory.py site.yml \
             -e @../config/ansible-vars.yml \
             --extra-vars "ansible_ssh_private_key_file=~/.ssh/id_rsa"
-            
+
       - name: Deployment Summary
         run: |
           echo "🚀 LumaDeploy AI Infrastructure deployment completed!"
@@ -204,24 +204,24 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
-        
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
-          
+
       - name: Configure Proxmox credentials
         run: |
           echo "proxmox_host=${{ secrets.PROXMOX_HOST }}" >> $GITHUB_ENV
           echo "proxmox_user=${{ secrets.PROXMOX_USER }}" >> $GITHUB_ENV
           echo "proxmox_password=${{ secrets.PROXMOX_PASSWORD }}" >> $GITHUB_ENV
           echo "proxmox_node=${{ secrets.PROXMOX_NODE }}" >> $GITHUB_ENV
-          
+
       - name: Terraform Init
         run: |
           cd terraform
           terraform init
-          
+
       - name: Terraform Destroy
         run: |
           cd terraform

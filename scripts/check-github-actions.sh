@@ -77,7 +77,7 @@ get_commit_info() {
     COMMIT_SHA=$(git rev-parse HEAD)
     SHORT_SHA=$(git rev-parse --short HEAD)
     COMMIT_MESSAGE=$(git log -1 --pretty=format:"%s")
-    
+
     print_status "Branch: $BRANCH"
     print_status "Commit: $SHORT_SHA - $COMMIT_MESSAGE"
 }
@@ -86,10 +86,10 @@ get_commit_info() {
 check_actions_status() {
     print_status "Checking GitHub Actions status..."
     echo ""
-    
+
     # Get workflow runs for the current commit
     RUNS=$(gh api repos/$REPO/actions/runs --jq ".workflow_runs[] | select(.head_sha == \"$COMMIT_SHA\")")
-    
+
     if [ -z "$RUNS" ]; then
         print_warning "No GitHub Actions runs found for commit $SHORT_SHA"
         print_status "This might be normal if:"
@@ -98,10 +98,10 @@ check_actions_status() {
         print_status "  • Workflows only run on specific triggers"
         return 0
     fi
-    
+
     # Initialize failure flag
     FAILED=false
-    
+
     # Parse and display workflow runs
     while IFS='|' read -r name status conclusion url; do
         case $status in
@@ -138,7 +138,7 @@ check_actions_status() {
                 ;;
         esac
     done < <(echo "$RUNS" | jq -r '. | "\(.name)|\(.status)|\(.conclusion)|\(.html_url)"')
-    
+
     # If any workflows failed, exit with error
     if [ "$FAILED" = true ]; then
         echo ""
@@ -157,23 +157,23 @@ wait_for_workflows_to_start() {
     local max_wait=60  # Maximum 60 seconds to wait for workflows to start
     local wait_time=0
     local check_interval=2
-    
+
     print_status "Waiting for GitHub Actions workflows to start..."
-    
+
     while [ $wait_time -lt $max_wait ]; do
         # Check if any workflows exist for this commit
         local workflow_count=$(gh api repos/$REPO/actions/runs --jq ".workflow_runs[] | select(.head_sha == \"$COMMIT_SHA\")" | wc -l | tr -d ' ')
-        
+
         if [ "$workflow_count" -gt 0 ]; then
             print_success "Found $workflow_count workflow(s) for commit $SHORT_SHA"
             return 0
         fi
-        
+
         printf "\r⏳ Waiting for workflows to start... ${wait_time}s/${max_wait}s"
         sleep $check_interval
         wait_time=$((wait_time + check_interval))
     done
-    
+
     echo ""
     print_warning "No workflows started within ${max_wait} seconds"
     print_status "This might be normal if no workflows are configured for this push"
@@ -184,19 +184,19 @@ wait_for_workflows_to_start() {
 wait_for_completion() {
     if [ "$1" = "--wait" ]; then
         print_status "Monitoring workflows until completion..."
-        
+
         local last_status=""
         local start_time=$(date +%s)
-        
+
         while true; do
             # Get current workflow status
             local runs_data=$(gh api repos/$REPO/actions/runs --jq ".workflow_runs[] | select(.head_sha == \"$COMMIT_SHA\")")
-            
+
             if [ -z "$runs_data" ]; then
                 print_warning "No workflows found for this commit"
                 break
             fi
-            
+
             # Count workflows by status
             local total=$(echo "$runs_data" | jq -s 'length')
             local completed=$(echo "$runs_data" | jq -s 'map(select(.status == "completed")) | length')
@@ -204,15 +204,15 @@ wait_for_completion() {
             local queued=$(echo "$runs_data" | jq -s 'map(select(.status == "queued")) | length')
             local success=$(echo "$runs_data" | jq -s 'map(select(.conclusion == "success")) | length')
             local failed=$(echo "$runs_data" | jq -s 'map(select(.conclusion == "failure")) | length')
-            
+
             # Create status summary
             local current_status="Total: $total | Completed: $completed | Running: $running | Queued: $queued | Success: $success | Failed: $failed"
-            
+
             # Only print if status changed
             if [ "$current_status" != "$last_status" ]; then
                 local elapsed=$(($(date +%s) - start_time))
                 printf "\r🔄 [${elapsed}s] $current_status"
-                
+
                 # Show individual workflow status if there are active workflows
                 if [ "$running" -gt 0 ] || [ "$queued" -gt 0 ]; then
                     echo ""
@@ -221,10 +221,10 @@ wait_for_completion() {
                         echo "   ... and $(($(echo "$runs_data" | jq -s 'map(select(.status != "completed")) | length') - 3)) more"
                     fi
                 fi
-                
+
                 last_status="$current_status"
             fi
-            
+
             # Check if all workflows are completed
             if [ "$running" -eq 0 ] && [ "$queued" -eq 0 ]; then
                 echo ""
@@ -235,10 +235,10 @@ wait_for_completion() {
                 fi
                 break
             fi
-            
+
             sleep 3  # Check every 3 seconds for responsive updates
         done
-        
+
         echo ""
         # Check final status
         check_actions_status
@@ -249,7 +249,7 @@ wait_for_completion() {
 show_summary() {
     echo ""
     print_status "📊 GitHub Actions Summary:"
-    
+
     # Get summary of all runs for this commit
     gh api repos/$REPO/actions/runs --jq ".workflow_runs[] | select(.head_sha == \"$COMMIT_SHA\") | {name, status, conclusion}" | jq -s '
         group_by(.name) | map({
@@ -266,14 +266,14 @@ show_summary() {
 main() {
     print_header
     echo ""
-    
+
     check_gh_cli
     check_gh_auth
     get_repo_info
     get_commit_info
-    
+
     echo ""
-    
+
     # Handle different wait modes
     case "$1" in
         "--smart-wait")
@@ -306,15 +306,15 @@ main() {
             fi
             ;;
     esac
-    
+
     show_summary
-    
+
     echo ""
     print_success "GitHub Actions status check complete!"
     print_status "💡 Run with --wait to wait for running workflows to finish"
     print_status "💡 Run with --smart-wait to detect startup and monitor to completion"
     print_status "💡 Add to git hooks with: ln -s ../../scripts/check-github-actions.sh .git/hooks/post-push"
-    
+
     # Auto-prioritize failures if they exist
     if [ "$FAILED" = true ]; then
         echo ""

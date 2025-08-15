@@ -272,11 +272,11 @@
             .grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .header h1 {
                 font-size: 2rem;
             }
-            
+
             .metrics {
                 grid-template-columns: repeat(2, 1fr);
             }
@@ -392,7 +392,7 @@
         function updateConnectionStatus(connected) {
             const status = document.getElementById('connectionStatus');
             const indicator = status.querySelector('.span');
-            
+
             if (connected) {
                 status.className = 'connection-status connected';
                 status.innerHTML = '<span class="status-indicator status-success"></span> Connected';
@@ -412,7 +412,7 @@
                 <span class="log-${type}">${message}</span>
             `;
             logs.insertBefore(entry, logs.firstChild);
-            
+
             // Keep only last 50 entries
             while (logs.children.length > 50) {
                 logs.removeChild(logs.lastChild);
@@ -424,10 +424,10 @@
             document.getElementById('successfulWorkflows').textContent = data.success || 0;
             document.getElementById('failedWorkflows').textContent = data.failed || 0;
             document.getElementById('runningWorkflows').textContent = data.running || 0;
-            
+
             const indicator = document.getElementById('statusIndicator');
             const message = document.getElementById('statusMessage');
-            
+
             if (data.failed > 0) {
                 indicator.className = 'status-indicator status-failure';
                 message.className = 'alert alert-error';
@@ -449,7 +449,7 @@
 
         async function checkStatus() {
             addLogEntry('🔍 Checking GitHub Actions status...', 'info');
-            
+
             try {
                 // Simulate API call - replace with actual endpoint
                 const response = await fetch('/api/status');
@@ -485,7 +485,7 @@
 
         async function testWebhook() {
             addLogEntry('🧪 Testing webhook endpoint...', 'info');
-            
+
             try {
                 const response = await fetch('http://localhost:8080/health');
                 if (response.ok) {
@@ -510,7 +510,7 @@
                 { message: '❌ Workflow failed: Deploy Production', type: 'error' },
                 { message: '📝 Push event received from main branch', type: 'info' }
             ];
-            
+
             setInterval(() => {
                 if (Math.random() > 0.7) { // 30% chance every 10 seconds
                     const event = events[Math.floor(Math.random() * events.length)];
@@ -524,7 +524,7 @@
             addLogEntry('🔔 GitHub Actions Monitor initialized', 'success');
             testWebhook(); // Check initial connection
             simulateEvents(); // Start event simulation
-            
+
             // Auto-refresh every 30 seconds
             setInterval(checkStatus, 30000);
         });
@@ -547,4 +547,3 @@
     </script>
 </body>
 </html>
-

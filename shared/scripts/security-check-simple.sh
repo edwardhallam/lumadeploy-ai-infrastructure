@@ -46,41 +46,41 @@ for pattern in "${PROJECT_FILES[@]}"; do
            [[ "$file" == *"/dist-packages/"* ]]; then
             continue
         fi
-        
+
         if [ -f "$file" ]; then
             echo "Checking $file..."
             file_violations=0
-            
+
             # Check for hardcoded IP addresses
             if grep -E "192\.168\.1\.[0-9]{1,3}" "$file" > /dev/null 2>&1; then
                 echo -e "  ${RED}❌ Found hardcoded IP address: 192.168.1.x${NC}"
                 file_violations=$((file_violations + 1))
             fi
-            
+
             # Check for API tokens in the format we're using
             if grep -E "root@pam![a-zA-Z0-9-]+" "$file" > /dev/null 2>&1; then
                 echo -e "  ${RED}❌ Found API token ID pattern${NC}"
                 file_violations=$((file_violations + 1))
             fi
-            
+
             # Check for UUID-like strings that might be API secrets
             if grep -E "[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}" "$file" > /dev/null 2>&1; then
                 echo -e "  ${RED}❌ Found UUID-like string (potential API secret)${NC}"
                 file_violations=$((file_violations + 1))
             fi
-            
+
             # Check for hardcoded passwords (but exclude the security script itself)
             if [[ "$file" != *"security-check"* ]] && grep -E "password.*=.*['\"][^'\"]*['\"]" "$file" > /dev/null 2>&1; then
                 echo -e "  ${RED}❌ Found hardcoded password pattern${NC}"
                 file_violations=$((file_violations + 1))
             fi
-            
+
             # Check for hardcoded API keys
             if grep -E "api_key.*=.*['\"][^'\"]*['\"]" "$file" > /dev/null 2>&1; then
                 echo -e "  ${RED}❌ Found hardcoded API key pattern${NC}"
                 file_violations=$((file_violations + 1))
             fi
-            
+
             if [ $file_violations -gt 0 ]; then
                 VIOLATIONS=$((VIOLATIONS + file_violations))
             fi

@@ -21,7 +21,7 @@ WARNINGS=0
 # Only check specific infrastructure files
 PROJECT_FILES=(
     "*.yml"
-    "*.yaml" 
+    "*.yaml"
     "*.sh"
     "*.md"
     "*.txt"
@@ -32,7 +32,7 @@ echo "📁 Scanning infrastructure files for sensitive data..."
 # Function to check a single file for sensitive data
 check_file() {
     local file="$1"
-    
+
     # Skip virtual environments, common directories, and security scripts
     if [[ "$file" == *"/venv/"* ]] || \
        [[ "$file" == *"/.git/"* ]] || \
@@ -41,7 +41,7 @@ check_file() {
        [[ "$file" == *"security-check"* ]]; then
         return 0
     fi
-    
+
     # Skip documentation and example files for strict checks (but still check for IPs)
     local is_docs_or_example=false
     if [[ "$file" == *"/docs/"* ]] || \
@@ -52,26 +52,26 @@ check_file() {
        [[ "$file" == *"github-actions-monitoring.md"* ]]; then
         is_docs_or_example=true
     fi
-    
+
     if [ -f "$file" ]; then
         echo "Checking $file..."
-        
+
         local file_violations=0
-        
+
         # Check for hardcoded IP addresses (more lenient for infrastructure)
         if grep -E "192\.168\.1\.[0-9]{1,3}" "$file" > /dev/null 2>&1; then
             echo -e "  ${YELLOW}⚠️  Found hardcoded IP address: 192.168.1.x${NC}"
             echo -e "  ${YELLOW}   Consider using environment variables${NC}"
             WARNINGS=$((WARNINGS + 1))
         fi
-        
+
         # Check for hardcoded passwords (strict, but skip docs/examples)
         if ! $is_docs_or_example; then
             if grep -E "password.*=.*['\"][^'\"]{8,}['\"]" "$file" > /dev/null 2>&1; then
                 echo -e "  ${RED}❌ Found hardcoded password pattern${NC}"
                 file_violations=$((file_violations + 1))
             fi
-            
+
             # Check for API keys (strict, but skip docs/examples)
             if grep -E "api_key.*=.*['\"][^'\"]{8,}['\"]" "$file" > /dev/null 2>&1; then
                 echo -e "  ${RED}❌ Found hardcoded API key pattern${NC}"
@@ -83,7 +83,7 @@ check_file() {
                 echo -e "  ${YELLOW}📝 Documentation contains example credentials (OK)${NC}"
             fi
         fi
-        
+
         if [ $file_violations -gt 0 ]; then
             VIOLATIONS=$((VIOLATIONS + file_violations))
         fi
@@ -122,7 +122,7 @@ else
     echo ""
     echo "🔧 Common fixes:"
     echo "  - Use environment variables for secrets"
-    echo "  - Use configuration files for IP addresses" 
+    echo "  - Use configuration files for IP addresses"
     echo "  - Remove hardcoded credentials"
     echo "  - Use .env files (and add them to .gitignore)"
     exit 1

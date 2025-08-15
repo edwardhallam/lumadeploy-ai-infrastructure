@@ -13,6 +13,8 @@ help:
 	@echo ""
 	@echo "  🔧 Setup & Configuration:"
 	@echo "    make setup      - Run interactive setup wizard"
+	@echo "    make setup-pre-commit - Setup pre-commit hooks for code quality"
+	@echo "    make dev-env          - Activate development environment"
 	@echo "    make security   - Configure security features (git-secrets, Husky)"
 	@echo "    make validate   - Validate all configuration files"
 	@echo ""
@@ -48,6 +50,14 @@ help:
 setup:
 	@echo "🔧 Running LumaDeploy interactive setup..."
 	@./setup.sh
+
+setup-pre-commit:
+	@echo "🔧 Setting up pre-commit hooks for code quality..."
+	@./scripts/setup-pre-commit.sh
+
+dev-env:
+	@echo "🔧 Activating development environment..."
+	@source scripts/activate-dev-env.sh
 
 security:
 	@echo "🔐 Setting up security features..."

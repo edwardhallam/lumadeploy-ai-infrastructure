@@ -83,6 +83,3 @@ If you continue having issues:
 2. Verify storage configuration
 3. Ensure LVM is properly configured
 4. Check firewall/network settings
-
-
-

@@ -53,7 +53,7 @@ for file in $FILES_TO_CHECK; do
     if [ -f "$file" ]; then
         echo "Checking $file..."
         file_violations=0
-        
+
         # Check for sensitive patterns
         for pattern in "${SENSITIVE_PATTERNS[@]}"; do
             if grep -E "$pattern" "$file" > /dev/null 2>&1; then
@@ -61,7 +61,7 @@ for file in $FILES_TO_CHECK; do
                 file_violations=$((file_violations + 1))
             fi
         done
-        
+
         # Check for IP addresses
         for pattern in "${IP_PATTERNS[@]}"; do
             if grep -E "$pattern" "$file" > /dev/null 2>&1; then
@@ -69,7 +69,7 @@ for file in $FILES_TO_CHECK; do
                 file_violations=$((file_violations + 1))
             fi
         done
-        
+
         # Check for API tokens
         for pattern in "${API_PATTERNS[@]}"; do
             if grep -E "$pattern" "$file" > /dev/null 2>&1; then
@@ -77,13 +77,13 @@ for file in $FILES_TO_CHECK; do
                 file_violations=$((file_violations + 1))
             fi
         done
-        
+
         # Check for potential secrets in comments
         if grep -i "secret\|password\|key\|token" "$file" | grep -v "example\|placeholder\|TODO\|FIXME" > /dev/null 2>&1; then
             echo -e "  ${YELLOW}⚠️  Potential sensitive data in comments${NC}"
             WARNINGS=$((WARNINGS + 1))
         fi
-        
+
         if [ $file_violations -gt 0 ]; then
             VIOLATIONS=$((VIOLATIONS + file_violations))
         fi

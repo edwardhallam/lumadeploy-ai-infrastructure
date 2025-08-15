@@ -8,6 +8,3 @@ requests==2.31.0
 
 # Optional: For better performance
 gunicorn==21.2.0
-
-
-

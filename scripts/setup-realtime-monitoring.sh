@@ -43,36 +43,36 @@ print_error() {
 # Check prerequisites
 check_prerequisites() {
     print_section "Checking Prerequisites"
-    
+
     local missing_deps=()
-    
+
     if ! command -v gh &> /dev/null; then
         missing_deps+=("GitHub CLI (gh)")
         print_error "GitHub CLI not found. Install with: brew install gh"
     else
         print_success "GitHub CLI found"
     fi
-    
+
     if ! command -v jq &> /dev/null; then
         missing_deps+=("jq")
         print_error "jq not found. Install with: brew install jq"
     else
         print_success "jq found"
     fi
-    
+
     if ! command -v python3 &> /dev/null; then
         missing_deps+=("Python 3")
         print_error "Python 3 not found"
     else
         print_success "Python 3 found"
     fi
-    
+
     if [ ${#missing_deps[@]} -gt 0 ]; then
         print_error "Missing dependencies: ${missing_deps[*]}"
         print_status "Please install the missing dependencies and run this script again"
         exit 1
     fi
-    
+
     # Check GitHub CLI authentication
     if ! gh auth status &> /dev/null; then
         print_error "Not authenticated with GitHub CLI"
@@ -81,14 +81,14 @@ check_prerequisites() {
     else
         print_success "GitHub CLI authenticated"
     fi
-    
+
     echo ""
 }
 
 # Get repository information
 get_repo_info() {
     print_section "Repository Information"
-    
+
     if git remote get-url origin &> /dev/null; then
         REPO_URL=$(git remote get-url origin)
         if [[ $REPO_URL == *"github.com"* ]]; then
@@ -102,35 +102,35 @@ get_repo_info() {
         print_error "No git remote origin found"
         exit 1
     fi
-    
+
     echo ""
 }
 
 # Setup monitoring scripts
 setup_scripts() {
     print_section "Setting Up Monitoring Scripts"
-    
+
     # Make scripts executable
     chmod +x scripts/realtime-monitor.sh
     chmod +x scripts/webhook-server.py
     print_success "Made monitoring scripts executable"
-    
+
     # Install Python dependencies for webhook server
     if command -v pip3 &> /dev/null; then
         print_status "Installing Python dependencies..."
         pip3 install requests --user --quiet || print_warning "Failed to install requests (webhook server may not work)"
     fi
-    
+
     echo ""
 }
 
 # Configure GitHub webhooks
 configure_webhooks() {
     print_section "GitHub Webhook Configuration"
-    
+
     print_status "Current webhooks for repository $REPO:"
     gh api repos/$REPO/hooks --jq '.[] | {id, name, config: {url: .config.url, content_type: .config.content_type}, events}' || print_warning "Failed to list webhooks"
-    
+
     echo ""
     print_status "To configure a webhook for real-time monitoring:"
     echo ""
@@ -145,14 +145,14 @@ configure_webhooks() {
     echo ""
     print_status "Or use the GitHub CLI:"
     echo "gh api repos/$REPO/hooks -X POST -f url='http://your-server:8080/webhook' -f content_type='json' -F events='[\"workflow_run\",\"push\"]'"
-    
+
     echo ""
 }
 
 # Setup Slack integration
 setup_slack() {
     print_section "Slack Integration Setup"
-    
+
     echo "To enable Slack notifications:"
     echo ""
     echo "1. Create a Slack App:"
@@ -173,14 +173,14 @@ setup_slack() {
     echo "   - Value: Your Slack webhook URL"
     echo ""
     echo "4. Uncomment Slack notification steps in .github/workflows/validate.yml"
-    
+
     echo ""
 }
 
 # Setup Discord integration
 setup_discord() {
     print_section "Discord Integration Setup"
-    
+
     echo "To enable Discord notifications:"
     echo ""
     echo "1. Create a Discord Webhook:"
@@ -198,18 +198,18 @@ setup_discord() {
     echo "   - Value: Your Discord webhook URL"
     echo ""
     echo "3. Uncomment Discord notification steps in .github/workflows/notify.yml"
-    
+
     echo ""
 }
 
 # Create systemd service for webhook server
 create_systemd_service() {
     print_section "Systemd Service Setup (Linux)"
-    
+
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         local service_file="/tmp/github-webhook.service"
         local script_path="$(pwd)/scripts/webhook-server.py"
-        
+
         cat > "$service_file" << EOF
 [Unit]
 Description=GitHub Actions Webhook Server
@@ -244,17 +244,17 @@ EOF
         print_status "Systemd service setup is only available on Linux"
         print_status "For macOS, you can use launchd or run the webhook server manually"
     fi
-    
+
     echo ""
 }
 
 # Create monitoring dashboard
 create_dashboard() {
     print_section "Monitoring Dashboard"
-    
+
     local dashboard_file="monitoring/github-actions-dashboard.html"
     mkdir -p monitoring
-    
+
     cat > "$dashboard_file" << 'EOF'
 <!DOCTYPE html>
 <html lang="en">
@@ -281,26 +281,26 @@ create_dashboard() {
             <h1>🔔 GitHub Actions Real-time Monitor</h1>
             <p>Live monitoring dashboard for GitHub Actions workflows</p>
         </div>
-        
+
         <div class="status-card">
             <h2>Quick Actions</h2>
             <button class="refresh-btn" onclick="checkStatus()">🔄 Check Status</button>
             <button class="refresh-btn" onclick="startMonitoring()">▶️ Start Monitoring</button>
             <button class="refresh-btn" onclick="viewLogs()">📋 View Logs</button>
         </div>
-        
+
         <div class="status-card" id="status-display">
             <h2>Current Status</h2>
             <p>Click "Check Status" to see the latest workflow status</p>
         </div>
-        
+
         <div class="status-card">
             <h2>Recent Activity</h2>
             <div id="activity-log" class="logs">
                 <p>No recent activity</p>
             </div>
         </div>
-        
+
         <div class="status-card">
             <h2>Setup Instructions</h2>
             <ol>
@@ -311,7 +311,7 @@ create_dashboard() {
             </ol>
         </div>
     </div>
-    
+
     <script>
         function checkStatus() {
             document.getElementById('status-display').innerHTML = '<h2>Current Status</h2><p>🔄 Checking status...</p>';
@@ -320,11 +320,11 @@ create_dashboard() {
                 document.getElementById('status-display').innerHTML = '<h2>Current Status</h2><div class="success"><p>✅ All workflows are healthy</p><p class="timestamp">Last checked: ' + new Date().toLocaleString() + '</p></div>';
             }, 1000);
         }
-        
+
         function startMonitoring() {
             alert('Start the monitoring script: ./scripts/realtime-monitor.sh monitor');
         }
-        
+
         function viewLogs() {
             const logs = document.getElementById('activity-log');
             logs.innerHTML = `
@@ -333,7 +333,7 @@ create_dashboard() {
                 <p>[${new Date().toLocaleTimeString()}] ✅ Workflow completed: Validate LumaDeploy</p>
             `;
         }
-        
+
         // Auto-refresh every 30 seconds
         setInterval(() => {
             if (document.getElementById('status-display').innerHTML.includes('healthy')) {
@@ -347,14 +347,14 @@ EOF
 
     print_success "Created monitoring dashboard: $dashboard_file"
     print_status "Open in browser: file://$(pwd)/$dashboard_file"
-    
+
     echo ""
 }
 
 # Update Makefile with new commands
 update_makefile() {
     print_section "Updating Makefile"
-    
+
     if [ -f "Makefile" ]; then
         # Add real-time monitoring commands to Makefile
         if ! grep -q "monitor-realtime" Makefile; then
@@ -386,16 +386,16 @@ EOF
     else
         print_warning "Makefile not found, skipping Makefile update"
     fi
-    
+
     echo ""
 }
 
 # Create documentation
 create_documentation() {
     print_section "Creating Documentation"
-    
+
     local doc_file="docs/realtime-monitoring.md"
-    
+
     cat > "$doc_file" << 'EOF'
 # 🔔 Real-time GitHub Actions Monitoring
 
@@ -631,14 +631,14 @@ fi
 EOF
 
     print_success "Created documentation: $doc_file"
-    
+
     echo ""
 }
 
 # Main execution
 main() {
     print_banner
-    
+
     check_prerequisites
     get_repo_info
     setup_scripts
@@ -649,7 +649,7 @@ main() {
     create_dashboard
     update_makefile
     create_documentation
-    
+
     print_section "Setup Complete!"
     print_success "Real-time GitHub Actions monitoring is now configured!"
     echo ""
@@ -662,7 +662,7 @@ main() {
     echo ""
     print_status "Documentation: docs/realtime-monitoring.md"
     print_status "Available commands: make help"
-    
+
     echo ""
     print_success "🎉 Happy monitoring!"
 }

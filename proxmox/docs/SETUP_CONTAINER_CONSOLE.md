@@ -225,6 +225,3 @@ python3 cursor_container_client.py
 ```
 
 This will give you a fully functional AI chat application running in your infrastructure, managed entirely from Cursor! 🎯
-
-
-

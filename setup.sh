@@ -19,11 +19,11 @@ print_banner() {
     cat << "EOF"
     ██╗     ██╗   ██╗███╗   ███╗ █████╗ ██████╗ ███████╗██████╗ ██╗      ██████╗ ██╗   ██╗
     ██║     ██║   ██║████╗ ████║██╔══██╗██╔══██╗██╔════╝██╔══██╗██║     ██╔═══██╗╚██╗ ██╔╝
-    ██║     ██║   ██║██╔████╔██║███████║██║  ██║█████╗  ██████╔╝██║     ██║   ██║ ╚████╔╝ 
-    ██║     ██║   ██║██║╚██╔╝██║██╔══██║██║  ██║██╔══╝  ██╔═══╝ ██║     ██║   ██║  ╚██╔╝  
-    ███████╗╚██████╔╝██║ ╚═╝ ██║██║  ██║██████╔╝███████╗██║     ███████╗╚██████╔╝   ██║   
-    ╚══════╝ ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═╝╚═════╝ ╚══════╝╚═╝     ╚══════╝ ╚═════╝    ╚═╝   
-                                                                                            
+    ██║     ██║   ██║██╔████╔██║███████║██║  ██║█████╗  ██████╔╝██║     ██║   ██║ ╚████╔╝
+    ██║     ██║   ██║██║╚██╔╝██║██╔══██║██║  ██║██╔══╝  ██╔═══╝ ██║     ██║   ██║  ╚██╔╝
+    ███████╗╚██████╔╝██║ ╚═╝ ██║██║  ██║██████╔╝███████╗██║     ███████╗╚██████╔╝   ██║
+    ╚══════╝ ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═╝╚═════╝ ╚══════╝╚═╝     ╚══════╝ ╚═════╝    ╚═╝
+
                             AI Service Builder
 EOF
     echo -e "${NC}"
@@ -62,53 +62,53 @@ check_directory() {
 # Check prerequisites
 check_prerequisites() {
     print_status "🔍 Checking prerequisites..."
-    
+
     local missing_tools=()
-    
+
     # Check for required tools
     if ! command -v git &> /dev/null; then
         missing_tools+=("git")
     fi
-    
+
     if ! command -v python3 &> /dev/null; then
         missing_tools+=("python3")
     fi
-    
+
     if ! command -v terraform &> /dev/null; then
         print_warning "Terraform not found. You'll need it for infrastructure deployment."
         print_cursor_tip "Ask Cursor: 'Help me install Terraform on my system'"
     fi
-    
+
     if ! command -v ansible &> /dev/null; then
         print_warning "Ansible not found. You'll need it for configuration management."
         print_cursor_tip "Ask Cursor: 'Help me install Ansible on my system'"
     fi
-    
+
     if ! command -v kubectl &> /dev/null; then
         print_warning "kubectl not found. You'll need it for Kubernetes management."
         print_cursor_tip "Ask Cursor: 'Help me install kubectl on my system'"
     fi
-    
+
     if [[ ${#missing_tools[@]} -gt 0 ]]; then
         print_error "Missing required tools: ${missing_tools[*]}"
         print_cursor_tip "Ask Cursor: 'Help me install the missing prerequisites for LumaDeploy'"
         exit 1
     fi
-    
+
     print_success "All basic prerequisites found"
 }
 
 # Setup Python virtual environment
 setup_python_env() {
     print_status "🐍 Setting up Python environment..."
-    
+
     if [[ ! -d "venv" ]]; then
         python3 -m venv venv
         print_success "Created Python virtual environment"
     fi
-    
+
     source venv/bin/activate
-    
+
     if [[ -f "proxmox/python-tools/requirements.txt" ]]; then
         pip install -r proxmox/python-tools/requirements.txt
         print_success "Installed Python dependencies"
@@ -118,7 +118,7 @@ setup_python_env() {
 # Setup security
 setup_security() {
     print_status "🔐 Setting up security features..."
-    
+
     if [[ -f "setup-security.sh" ]]; then
         print_cursor_tip "Running security setup. This will install git-secrets and configure pre-commit hooks."
         ./setup-security.sh
@@ -133,55 +133,55 @@ interactive_config() {
     echo ""
     print_cursor_tip "You can ask Cursor to help you with any of these configuration questions!"
     echo ""
-    
+
     # Proxmox Configuration
     echo -e "${CYAN}📡 Proxmox Configuration${NC}"
     echo "Please provide your Proxmox server details:"
     echo ""
-    
+
     read -p "Proxmox host IP or hostname: " proxmox_host
     read -p "Proxmox node name (default: pve01): " proxmox_node
     proxmox_node=${proxmox_node:-pve01}
-    
+
     read -p "Proxmox API token ID (root@pam!token-name): " proxmox_user
     read -s -p "Proxmox API token secret: " proxmox_password
     echo ""
-    
+
     # Network Configuration
     echo ""
     echo -e "${CYAN}🌐 Network Configuration${NC}"
     read -p "Network gateway (e.g., 192.168.1.1): " network_gateway
     read -p "Network subnet (e.g., 192.168.1.0/24): " network_subnet
-    
+
     # Resource Configuration
     echo ""
     echo -e "${CYAN}💾 Resource Configuration${NC}"
     read -p "Storage pool name (default: local-lvm): " storage_pool
     storage_pool=${storage_pool:-local-lvm}
-    
+
     read -p "Total CPU cores available for K3s (default: 10): " total_cpu
     total_cpu=${total_cpu:-10}
-    
+
     read -p "Total memory available for K3s in GB (default: 24): " total_memory_gb
     total_memory_gb=${total_memory_gb:-24}
     total_memory=$((total_memory_gb * 1024))
-    
+
     # AI Services Configuration
     echo ""
     echo -e "${CYAN}🤖 AI Services Configuration${NC}"
     read -p "Deploy Ollama for local LLMs? (y/n, default: y): " deploy_ollama
     deploy_ollama=${deploy_ollama:-y}
-    
+
     read -p "Deploy LibreChat web interface? (y/n, default: y): " deploy_librechat
     deploy_librechat=${deploy_librechat:-y}
-    
+
     read -p "Number of MCP servers to deploy (default: 5): " mcp_count
     mcp_count=${mcp_count:-5}
-    
+
     # Generate configuration files
     generate_terraform_config
     generate_ansible_config
-    
+
     print_success "Configuration files generated successfully!"
     print_cursor_tip "Your configuration is ready! Ask Cursor: 'Help me review and deploy my LumaDeploy configuration'"
 }
@@ -189,7 +189,7 @@ interactive_config() {
 # Generate Terraform configuration
 generate_terraform_config() {
     print_status "📝 Generating Terraform configuration..."
-    
+
     cat > config/terraform.tfvars << EOF
 # LumaDeploy AI Service Builder - Generated Configuration
 # Generated on $(date)
@@ -251,7 +251,7 @@ EOF
 # Generate Ansible configuration
 generate_ansible_config() {
     print_status "📝 Generating Ansible configuration..."
-    
+
     cat > config/ansible-vars.yml << EOF
 # LumaDeploy AI Service Builder - Generated Configuration
 # Generated on $(date)
@@ -311,7 +311,7 @@ EOF
 # Create Makefile for easy commands
 create_makefile() {
     print_status "📋 Creating Makefile for easy commands..."
-    
+
     cat > Makefile << 'EOF'
 # LumaDeploy AI Service Builder - Makefile
 # Use these commands to manage your AI infrastructure
@@ -375,7 +375,7 @@ clean:
 	@rm -f /tmp/lumadeploy-*.log
 	@echo "✅ Cleanup complete"
 EOF
-    
+
     print_success "Makefile created"
 }
 
@@ -420,12 +420,12 @@ show_next_steps() {
 # Main execution
 main() {
     print_banner
-    
+
     print_status "🚀 Welcome to LumaDeploy AI Service Builder Setup!"
     echo ""
     print_cursor_tip "This setup will help you configure your AI infrastructure. Ask Cursor for help anytime!"
     echo ""
-    
+
     check_directory
     check_prerequisites
     setup_python_env

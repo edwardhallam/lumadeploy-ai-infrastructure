@@ -4,14 +4,14 @@ proxmox:
   port: 8006                       # Proxmox web interface port (default: 8006)
   verify_ssl: false                # Set to false for self-signed certificates
   api_token: ""                    # Your Proxmox API token (leave empty for security)
-  
+
 # LXC Container Defaults
 lxc:
   template: "ubuntu-22.04-standard"
   memory: 1024
   cores: 1
   storage: "local-lvm"
-  
+
 # API Configuration
 api:
   timeout: 30

@@ -167,17 +167,17 @@ spec:
             echo "Waiting for Ollama service..."
             sleep 10
           done
-          
+
           # Download recommended models
           echo "Downloading Llama 2 7B model..."
           curl -X POST http://ollama.ai-infrastructure.svc.cluster.local/api/pull -d '{"name":"llama2:7b"}'
-          
+
           echo "Downloading Code Llama 7B model..."
           curl -X POST http://ollama.ai-infrastructure.svc.cluster.local/api/pull -d '{"name":"codellama:7b"}'
-          
+
           echo "Downloading Mistral 7B model..."
           curl -X POST http://ollama.ai-infrastructure.svc.cluster.local/api/pull -d '{"name":"mistral:7b"}'
-          
+
           echo "Model download completed!"
       affinity:
         podAffinity:

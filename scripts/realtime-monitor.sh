@@ -126,10 +126,10 @@ detect_changes() {
         local run_url=$(echo "$run" | jq -r '.html_url')
         local run_branch=$(echo "$run" | jq -r '.head_branch')
         local run_sha=$(echo "$run" | jq -r '.head_sha')
-        
+
         # Check if this run is new or has changed
         local known_run=$(echo "$known_runs" | jq -r --arg id "$run_id" '.[$id]')
-        
+
         if [ "$known_run" = "null" ]; then
             # New workflow run detected
             print_alert "New workflow started: $run_name"
@@ -138,16 +138,16 @@ detect_changes() {
             print_status "Status: $run_status"
             print_status "URL: $run_url"
             echo ""
-            
+
             # Log notification
             echo "[$(date '+%Y-%m-%d %H:%M:%S')] NEW: $run_name ($run_status) - $run_url" >> "$NOTIFICATION_FILE"
             changes_detected=true
-            
+
         else
             # Check if status changed
             local known_status=$(echo "$known_run" | jq -r '.status')
             local known_conclusion=$(echo "$known_run" | jq -r '.conclusion')
-            
+
             if [ "$run_status" != "$known_status" ] || [ "$run_conclusion" != "$known_conclusion" ]; then
                 case "$run_status" in
                     "completed")
@@ -158,7 +158,7 @@ detect_changes() {
                             "failure")
                                 print_alert "Workflow failed: $run_name"
                                 print_status "URL: $run_url"
-                                
+
                                 # Auto-prioritize failures
                                 if [ -f "./scripts/auto-prioritize-failures.sh" ]; then
                                     print_status "Auto-prioritizing failure..."
@@ -180,7 +180,7 @@ detect_changes() {
                         print_status "Workflow queued: $run_name"
                         ;;
                 esac
-                
+
                 # Log notification
                 echo "[$(date '+%Y-%m-%d %H:%M:%S')] UPDATE: $run_name ($run_status/$run_conclusion) - $run_url" >> "$NOTIFICATION_FILE"
                 changes_detected=true
@@ -194,7 +194,7 @@ detect_changes() {
         local run_id=$(echo "$run" | jq -r '.id')
         new_known_runs=$(echo "$new_known_runs" | jq --arg id "$run_id" --argjson run "$run" '.[$id] = $run')
     done
-    
+
     local new_state=$(echo "$last_state" | jq --argjson runs "$new_known_runs" --arg timestamp "$(date +%s)" '.known_runs = $runs | .last_check = ($timestamp | tonumber)')
     echo "$new_state" > "$STATE_FILE"
 }
@@ -203,7 +203,7 @@ detect_changes() {
 send_webhook() {
     local event="$1"
     local data="$2"
-    
+
     if [ -n "$WEBHOOK_URL" ]; then
         curl -s -X POST -H "Content-Type: application/json" \
              -d "$data" \
@@ -217,16 +217,16 @@ monitor_continuous() {
     print_status "Starting continuous monitoring..."
     print_status "Press Ctrl+C to stop"
     echo ""
-    
+
     init_state
-    
+
     while true; do
         if workflow_runs=$(get_workflow_runs); then
             detect_changes "$workflow_runs"
         else
             print_error "Failed to get workflow runs, continuing..."
         fi
-        
+
         sleep $POLL_INTERVAL
     done
 }
@@ -236,9 +236,9 @@ check_once() {
     print_banner
     print_status "Performing one-time check..."
     echo ""
-    
+
     init_state
-    
+
     if workflow_runs=$(get_workflow_runs); then
         detect_changes "$workflow_runs"
         print_success "Check completed"
@@ -255,7 +255,7 @@ start_webhook_server() {
     print_status "Starting webhook server on port $port..."
     print_status "Configure GitHub webhook to: http://your-server:$port/webhook"
     echo ""
-    
+
     # Simple webhook server using netcat (for demonstration)
     while true; do
         echo -e "HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\nOK" | nc -l -p $port -q 1

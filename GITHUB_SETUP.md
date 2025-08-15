@@ -71,7 +71,7 @@ cd infrastructure-management && cursor .
 Cursor will now suggest relevant extensions as you work with:
 
 - **Python files** → Python extension
-- **YAML files** → YAML extension  
+- **YAML files** → YAML extension
 - **Shell scripts** → Shell Script extension
 - **Markdown** → Markdown extension
 

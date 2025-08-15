@@ -23,7 +23,7 @@ resource "proxmox_lxc" "librechat" {
     gw     = var.container_gateway
   }
   # ssh_public_keys = file("~/.ssh/id_rsa.pub")
-  onboot          = true
-  unprivileged    = false
-  tags            = "librechat,terraform,automated"
+  onboot       = true
+  unprivileged = false
+  tags         = "librechat,terraform,automated"
 }

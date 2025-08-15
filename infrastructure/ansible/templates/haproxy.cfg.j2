@@ -52,13 +52,13 @@ backend k3s-api-backend
 frontend http-frontend
     bind *:80
     mode http
-    
+
     # Define ACLs for different services
     acl is_librechat hdr_beg(host) -i librechat
     acl is_ollama hdr_beg(host) -i ollama
     acl is_mcp path_beg /mcp
     acl is_dashboard hdr_beg(host) -i dashboard
-    
+
     # Route to appropriate backends
     use_backend librechat-backend if is_librechat
     use_backend ollama-backend if is_ollama

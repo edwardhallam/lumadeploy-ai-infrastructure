@@ -1,0 +1,57 @@
+repos:
+  # Terraform formatting and validation
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.100.0
+    hooks:
+      - id: terraform_fmt
+        args: ["--args=-no-color", "--args=-diff"]
+      - id: terraform_validate
+      - id: terraform_docs
+        args: ["--args=--sort-by-required"]
+      - id: terraform_tflint
+        args: ["--args=--disable-rule=terraform_deprecated_index"]
+
+  # YAML validation (for Kubernetes manifests, Ansible, etc.)
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-yaml
+        args: ["--allow-multiple-documents"]
+      - id: check-json
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-added-large-files
+        args: ["--maxkb=1000"]
+
+  # Python code quality (for your Proxmox tools)
+  - repo: local
+    hooks:
+      - id: black
+        name: black
+        entry: black
+        language: system
+        types: [python]
+        args: ["--line-length=88"]
+      - id: flake8
+        name: flake8
+        entry: flake8
+        language: system
+        types: [python]
+        args: ["--max-line-length=88", "--extend-ignore=E203,W503"]
+
+  # Shell script validation
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.11.0.1
+    hooks:
+      - id: shellcheck
+        args: ["--severity=warning"]
+
+  # Ansible syntax checking
+  - repo: local
+    hooks:
+      - id: ansible-lint
+        name: ansible-lint
+        entry: ansible-lint
+        language: system
+        types: [yaml]
+        args: ["--profile=min"]
