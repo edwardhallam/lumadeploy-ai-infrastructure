@@ -1,0 +1,127 @@
+name: Real-time Notifications
+
+on:
+  workflow_run:
+    workflows: ["Validate LumaDeploy"]
+    types: [requested, in_progress, completed]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Get workflow info
+      id: workflow
+      run: |
+        echo "workflow_name=${{ github.event.workflow_run.name }}" >> $GITHUB_OUTPUT
+        echo "workflow_status=${{ github.event.workflow_run.status }}" >> $GITHUB_OUTPUT
+        echo "workflow_conclusion=${{ github.event.workflow_run.conclusion }}" >> $GITHUB_OUTPUT
+        echo "workflow_url=${{ github.event.workflow_run.html_url }}" >> $GITHUB_OUTPUT
+        echo "commit_sha=${{ github.event.workflow_run.head_sha }}" >> $GITHUB_OUTPUT
+        echo "commit_message=${{ github.event.workflow_run.head_commit.message }}" >> $GITHUB_OUTPUT
+        echo "actor=${{ github.event.workflow_run.triggering_actor.login }}" >> $GITHUB_OUTPUT
+        echo "branch=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
+
+    - name: Notify workflow started
+      if: github.event.action == 'requested'
+      run: |
+        echo "🚀 GitHub Actions workflow started!"
+        echo "Workflow: ${{ steps.workflow.outputs.workflow_name }}"
+        echo "Branch: ${{ steps.workflow.outputs.branch }}"
+        echo "Commit: ${{ steps.workflow.outputs.commit_sha }}"
+        echo "Actor: ${{ steps.workflow.outputs.actor }}"
+        echo "URL: ${{ steps.workflow.outputs.workflow_url }}"
+        
+        # Create notification file for external monitoring
+        cat > /tmp/workflow_notification.json << EOF
+        {
+          "event": "workflow_started",
+          "workflow": "${{ steps.workflow.outputs.workflow_name }}",
+          "status": "in_progress",
+          "branch": "${{ steps.workflow.outputs.branch }}",
+          "commit": "${{ steps.workflow.outputs.commit_sha }}",
+          "actor": "${{ steps.workflow.outputs.actor }}",
+          "url": "${{ steps.workflow.outputs.workflow_url }}",
+          "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+        }
+        EOF
+
+    - name: Notify workflow in progress
+      if: github.event.action == 'in_progress'
+      run: |
+        echo "🔄 GitHub Actions workflow running..."
+        echo "Workflow: ${{ steps.workflow.outputs.workflow_name }}"
+        echo "Status: ${{ steps.workflow.outputs.workflow_status }}"
+        echo "URL: ${{ steps.workflow.outputs.workflow_url }}"
+
+    - name: Notify workflow completed - Success
+      if: github.event.action == 'completed' && github.event.workflow_run.conclusion == 'success'
+      run: |
+        echo "✅ GitHub Actions workflow completed successfully!"
+        echo "Workflow: ${{ steps.workflow.outputs.workflow_name }}"
+        echo "Branch: ${{ steps.workflow.outputs.branch }}"
+        echo "Commit: ${{ steps.workflow.outputs.commit_sha }}"
+        echo "URL: ${{ steps.workflow.outputs.workflow_url }}"
+        
+        # Create success notification
+        cat > /tmp/workflow_notification.json << EOF
+        {
+          "event": "workflow_success",
+          "workflow": "${{ steps.workflow.outputs.workflow_name }}",
+          "status": "completed",
+          "conclusion": "success",
+          "branch": "${{ steps.workflow.outputs.branch }}",
+          "commit": "${{ steps.workflow.outputs.commit_sha }}",
+          "actor": "${{ steps.workflow.outputs.actor }}",
+          "url": "${{ steps.workflow.outputs.workflow_url }}",
+          "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+        }
+        EOF
+
+    - name: Notify workflow completed - Failure
+      if: github.event.action == 'completed' && github.event.workflow_run.conclusion == 'failure'
+      run: |
+        echo "❌ GitHub Actions workflow failed!"
+        echo "Workflow: ${{ steps.workflow.outputs.workflow_name }}"
+        echo "Branch: ${{ steps.workflow.outputs.branch }}"
+        echo "Commit: ${{ steps.workflow.outputs.commit_sha }}"
+        echo "URL: ${{ steps.workflow.outputs.workflow_url }}"
+        
+        # Create failure notification
+        cat > /tmp/workflow_notification.json << EOF
+        {
+          "event": "workflow_failure",
+          "workflow": "${{ steps.workflow.outputs.workflow_name }}",
+          "status": "completed",
+          "conclusion": "failure",
+          "branch": "${{ steps.workflow.outputs.branch }}",
+          "commit": "${{ steps.workflow.outputs.commit_sha }}",
+          "actor": "${{ steps.workflow.outputs.actor }}",
+          "url": "${{ steps.workflow.outputs.workflow_url }}",
+          "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+        }
+        EOF
+
+    # Optional: Send to Slack (uncomment and configure SLACK_WEBHOOK_URL secret)
+    # - name: Send Slack notification
+    #   if: always()
+    #   uses: 8398a7/action-slack@v3
+    #   with:
+    #     status: ${{ job.status }}
+    #     channel: '#infrastructure'
+    #     webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+    #     fields: repo,message,commit,author,action,eventName,ref,workflow
+
+    # Optional: Send to Discord (uncomment and configure DISCORD_WEBHOOK secret)
+    # - name: Send Discord notification
+    #   if: always()
+    #   uses: Ilshidur/action-discord@master
+    #   env:
+    #     DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+    #   with:
+    #     args: |
+    #       🔔 **GitHub Actions Update**
+    #       **Workflow:** ${{ steps.workflow.outputs.workflow_name }}
+    #       **Status:** ${{ steps.workflow.outputs.workflow_conclusion || 'Running' }}
+    #       **Branch:** ${{ steps.workflow.outputs.branch }}
+    #       **Commit:** ${{ steps.workflow.outputs.commit_sha }}
+    #       **View:** ${{ steps.workflow.outputs.workflow_url }}

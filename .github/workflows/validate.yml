@@ -128,3 +128,34 @@ jobs:
         echo "✅ Kubernetes manifests valid"
         echo ""
         echo "🚀 Ready for deployment!"
+
+    # Optional: Send success notification to Slack
+    # Uncomment and configure SLACK_WEBHOOK_URL secret to enable
+    # - name: Notify success to Slack
+    #   if: success()
+    #   uses: 8398a7/action-slack@v3
+    #   with:
+    #     status: success
+    #     channel: '#infrastructure'
+    #     webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+    #     fields: repo,message,commit,author,action,eventName,ref,workflow
+    #     text: |
+    #       ✅ LumaDeploy validation passed!
+    #       Branch: ${{ github.ref }}
+    #       Commit: ${{ github.sha }}
+
+    # Optional: Send failure notification to Slack
+    # Uncomment and configure SLACK_WEBHOOK_URL secret to enable
+    # - name: Notify failure to Slack
+    #   if: failure()
+    #   uses: 8398a7/action-slack@v3
+    #   with:
+    #     status: failure
+    #     channel: '#infrastructure'
+    #     webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+    #     fields: repo,message,commit,author,action,eventName,ref,workflow
+    #     text: |
+    #       ❌ LumaDeploy validation failed!
+    #       Branch: ${{ github.ref }}
+    #       Commit: ${{ github.sha }}
+    #       Please check the workflow logs.
