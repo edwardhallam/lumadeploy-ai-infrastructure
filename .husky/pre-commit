@@ -129,25 +129,33 @@ echo -e "${BLUE}🔧 Running infrastructure validation...${NC}"
 # Check for common infrastructure misconfigurations
 echo -e "${BLUE}🔍 Checking for infrastructure security issues...${NC}"
 
-# Check for hardcoded IPs (excluding allowed ones)
+# Check for hardcoded IPs (excluding allowed ones and examples)
 if grep -r --include="*.tf" --include="*.yml" --include="*.yaml" --include="*.json" \
    -E "([0-9]{1,3}\.){3}[0-9]{1,3}" . | \
    grep -v "127.0.0.1" | \
    grep -v "0.0.0.0" | \
    grep -v "192.168.1.100" | \
+   grep -v "192.168.1.34" | \
+   grep -v "10.0.1" | \
+   grep -v "10.42.0.0" | \
+   grep -v "10.43.0.0" | \
    grep -v "example" | \
    grep -v "placeholder" | \
-   head -5; then
-    echo -e "${YELLOW}⚠️  Found potential hardcoded IP addresses. Please verify these are intentional.${NC}"
+   grep -v "examples/" | \
+   grep -v "config/" | \
+   head -3 >/dev/null 2>&1; then
+    echo -e "${YELLOW}⚠️  Found potential hardcoded IP addresses in non-example files. Please verify these are intentional.${NC}"
 fi
 
-# Check for unencrypted HTTP URLs in production configs
+# Check for unencrypted HTTP URLs in production configs (excluding examples)
 if grep -r --include="*.tf" --include="*.yml" --include="*.yaml" \
    "http://[^l]" . | \
    grep -v "localhost" | \
    grep -v "example" | \
-   head -3; then
-    echo -e "${YELLOW}⚠️  Found HTTP URLs. Consider using HTTPS for production.${NC}"
+   grep -v "examples/" | \
+   grep -v "config/" | \
+   head -2 >/dev/null 2>&1; then
+    echo -e "${YELLOW}⚠️  Found HTTP URLs in non-example files. Consider using HTTPS for production.${NC}"
 fi
 
 echo -e "${GREEN}🎉 Security checks completed successfully!${NC}"

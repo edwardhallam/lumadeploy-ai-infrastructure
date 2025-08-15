@@ -26,6 +26,12 @@ help:
 	@echo "    make test       - Run infrastructure tests"
 	@echo "    make docs       - Generate/update documentation"
 	@echo ""
+	@echo "  🔍 GitHub Actions:"
+	@echo "    make check-actions      - Check GitHub Actions status"
+	@echo "    make check-actions-wait - Check status and wait for completion"
+	@echo "    make push-and-check     - Push to GitHub and check Actions"
+	@echo "    make setup-hooks        - Setup automatic Actions checking"
+	@echo ""
 	@echo "  🧹 Maintenance:"
 	@echo "    make destroy    - Destroy infrastructure (with confirmation)"
 	@echo "    make clean      - Clean temporary files and caches"
@@ -200,7 +206,7 @@ clean:
 	@echo "✅ Cleanup complete"
 
 # Utility targets
-.PHONY: ssh-master ssh-worker1 ssh-worker2 kubeconfig
+.PHONY: ssh-master ssh-worker1 ssh-worker2 kubeconfig check-actions push-and-check
 ssh-master:
 	@echo "🔗 Connecting to K3s master node..."
 	@MASTER_IP=$$(cd terraform && terraform output -raw k3s_master_ip 2>/dev/null); \
@@ -250,3 +256,31 @@ dev-logs:
 	@kubectl logs -f -l app=librechat -n librechat &
 	@kubectl logs -f -l app=mcp-server -n mcp-servers &
 	@wait
+
+# GitHub Actions Management
+check-actions:
+	@echo "🔍 Checking GitHub Actions status..."
+	@./scripts/check-github-actions.sh
+
+check-actions-wait:
+	@echo "🔍 Checking GitHub Actions status (waiting for completion)..."
+	@./scripts/check-github-actions.sh --wait
+
+push-and-check:
+	@echo "🚀 Pushing to GitHub and checking Actions status..."
+	@git push origin main
+	@echo ""
+	@echo "⏳ Waiting a moment for workflows to start..."
+	@sleep 5
+	@./scripts/check-github-actions.sh
+
+# Git hooks setup
+setup-hooks:
+	@echo "🔗 Setting up git hooks..."
+	@mkdir -p .git/hooks
+	@echo '#!/bin/bash' > .git/hooks/post-push
+	@echo 'echo "🔍 Checking GitHub Actions after push..."' >> .git/hooks/post-push
+	@echo './scripts/check-github-actions.sh' >> .git/hooks/post-push
+	@chmod +x .git/hooks/post-push
+	@echo "✅ Git hooks configured"
+	@echo "💡 GitHub Actions will be checked automatically after each push"
