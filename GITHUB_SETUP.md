@@ -8,9 +8,9 @@
 - **Flexible Deployment**: Choose which approach works best for your needs
 
 ### 1. Main Infrastructure Repository
-- **Name**: `infrastructure-management`
-- **URL**: https://github.com/edwardhallam/infrastructure-management
-- **Description**: Centralized infrastructure management for Proxmox, LXC containers, and Cloudflare tunnels
+- **Name**: `lumadeploy-ai-infrastructure`
+- **URL**: https://github.com/edwardhallam/lumadeploy-ai-infrastructure
+- **Description**: LumaDeploy AI Service Builder - Centralized infrastructure management for Proxmox, K3s clusters, and AI service deployment
 - **Status**: ✅ Created, ✅ Pushed, ✅ Consolidated
 
 ### 2. Individual Project Repositories
@@ -73,7 +73,7 @@ Cursor will now suggest relevant extensions as you work with:
 
 ## Repository URLs Summary
 ```
-Main Unified:    https://github.com/edwardhallam/infrastructure-management
+Main Unified:    https://github.com/edwardhallam/lumadeploy-ai-infrastructure
                  (Private - contains all projects for development)
 
 Individual Repositories:

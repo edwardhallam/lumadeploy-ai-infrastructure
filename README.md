@@ -19,8 +19,8 @@ LumaDeploy is a comprehensive AI infrastructure platform that provides:
 
 ### **1. Clone and Setup**
 ```bash
-git clone https://github.com/your-username/lumadeploy-ai-service-builder.git
-cd lumadeploy-ai-service-builder
+git clone https://github.com/edwardhallam/lumadeploy-ai-infrastructure.git
+cd lumadeploy-ai-infrastructure
 ./setup.sh
 ```
 
@@ -91,7 +91,7 @@ make status    # Monitor deployment progress
 ## 📁 **Project Structure**
 
 ```
-lumadeploy-ai-service-builder/
+lumadeploy-ai-infrastructure/
 ├── 📋 setup.sh                    # Interactive setup script
 ├── 📖 README.md                   # This file
 ├── 🔐 SECURITY.md                 # Security documentation
