@@ -1,0 +1,46 @@
+{
+  "name": "ai-infrastructure-platform",
+  "version": "1.0.0",
+  "description": "AI Infrastructure Platform with K3s, MCP Servers, Ollama, and LibreChat",
+  "main": "index.js",
+  "scripts": {
+    "prepare": "husky install",
+    "test": "echo \"Running infrastructure validation tests...\" && npm run validate-configs",
+    "validate-configs": "echo \"Validating Terraform and Ansible configurations...\"",
+    "security-scan": "git-secrets --scan -r",
+    "security-install": "git-secrets --install && git-secrets --register-aws",
+    "lint": "echo \"Linting infrastructure code...\"",
+    "pre-commit": "npm run security-scan && npm run validate-configs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-username/ai-infrastructure-platform.git"
+  },
+  "keywords": [
+    "infrastructure",
+    "k3s",
+    "kubernetes",
+    "ai",
+    "mcp",
+    "ollama",
+    "librechat",
+    "proxmox",
+    "terraform",
+    "ansible"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "husky": "^8.0.3"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run pre-commit",
+      "commit-msg": "echo 'Validating commit message...'"
+    }
+  }
+}

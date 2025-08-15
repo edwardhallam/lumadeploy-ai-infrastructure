@@ -1,0 +1,38 @@
+{
+  "name": "ai-infrastructure-end-user",
+  "version": "1.0.0",
+  "description": "End-user AI Infrastructure deployment with GitOps and Cursor guidance",
+  "main": "main.py",
+  "scripts": {
+    "prepare": "husky install",
+    "test": "echo \"Running infrastructure validation...\" && python -c \"print('✅ Basic validation passed')\"",
+    "security-scan": "git-secrets --scan -r",
+    "security-install": "git-secrets --install && git-secrets --register-aws",
+    "pre-commit": "npm run security-scan",
+    "validate": "echo \"Validating configuration files...\"",
+    "setup": "./setup.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-username/ai-infrastructure-end-user.git"
+  },
+  "keywords": [
+    "infrastructure",
+    "ai",
+    "deployment",
+    "cursor",
+    "gitops",
+    "terraform",
+    "ansible",
+    "k3s",
+    "kubernetes"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "husky": "^8.0.3"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

@@ -1,0 +1,157 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+echo -e "${BLUE}🔐 Running security checks before commit...${NC}"
+
+# Check if git-secrets is installed
+GIT_SECRETS_PATH=$(command -v git-secrets)
+if [ -z "$GIT_SECRETS_PATH" ]; then
+    echo -e "${RED}❌ git-secrets is not installed.${NC}"
+    echo -e "${YELLOW}Please install git-secrets:${NC}"
+    echo -e "  macOS: ${GREEN}brew install git-secrets${NC}"
+    echo -e "  Linux: ${GREEN}git clone https://github.com/awslabs/git-secrets.git && cd git-secrets && make install${NC}"
+    echo -e "  Windows: ${GREEN}Download from https://github.com/awslabs/git-secrets${NC}"
+    exit 1
+fi
+
+echo -e "${GREEN}✅ git-secrets found at: $GIT_SECRETS_PATH${NC}"
+
+# Initialize git-secrets configuration for AWS
+echo -e "${BLUE}🔧 Initializing git-secrets with AWS patterns...${NC}"
+git-secrets --register-aws > /dev/null 2>&1
+
+# Custom REGEX patterns for infrastructure secrets
+# Based on the patterns from the Medium article, adapted for our infrastructure
+patterns=(
+    # Proxmox API Tokens (format: root@pam!token-name=uuid-secret)
+    "root@pam![a-zA-Z0-9_-]+=[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"
+    
+    # Generic API tokens and secrets
+    "['\"]?[Aa]pi_?[Kk]ey['\"]?\s*[:=]\s*['\"][a-zA-Z0-9_-]{20,}['\"]"
+    "['\"]?[Ss]ecret['\"]?\s*[:=]\s*['\"][a-zA-Z0-9_-]{20,}['\"]"
+    "['\"]?[Tt]oken['\"]?\s*[:=]\s*['\"][a-zA-Z0-9_-]{20,}['\"]"
+    
+    # SSH Private Keys
+    "(-){5}\\s*(BEGIN\\s(RSA\\s)?PRIVATE\\sKEY)\\s*(-){5}"
+    "(-){5}\\s*(BEGIN\\sOPENSSH\\sPRIVATE\\sKEY)\\s*(-){5}"
+    
+    # Database connection strings
+    "(mongodb|mysql|postgresql)://[a-zA-Z0-9_.-]+:[a-zA-Z0-9_.-]+@[a-zA-Z0-9_.-]+:[0-9]+/[a-zA-Z0-9_.-]+"
+    
+    # Generic passwords in configuration files
+    "['\"]?[Pp]assword['\"]?\s*[:=]\s*['\"][^'\"\\s]{8,}['\"]"
+    "['\"]?[Pp]ass['\"]?\s*[:=]\s*['\"][^'\"\\s]{8,}['\"]"
+    
+    # Kubernetes secrets (base64 encoded)
+    "['\"]?[Dd]ata['\"]?\s*:\s*['\"]?[A-Za-z0-9+/]{20,}={0,2}['\"]?"
+    
+    # Cloud provider keys
+    "AKIA[0-9A-Z]{16}"  # AWS Access Key
+    "sk_live_[0-9a-zA-Z]{99}"  # Stripe Live Key
+    "sk_test_[0-9a-zA-Z]{99}"  # Stripe Test Key
+    
+    # Terraform sensitive variables
+    "['\"]?[Ss]ensitive['\"]?\s*=\s*true.*['\"][^'\"\\s]{8,}['\"]"
+    
+    # Ansible vault passwords
+    "\\$ANSIBLE_VAULT;[0-9.]+;AES256"
+    
+    # Generic secrets in environment variables
+    "export\\s+[A-Z_]*[Ss][Ee][Cc][Rr][Ee][Tt][A-Z_]*\\s*=\\s*['\"]?[a-zA-Z0-9_-]{20,}['\"]?"
+    "export\\s+[A-Z_]*[Kk][Ee][Yy][A-Z_]*\\s*=\\s*['\"]?[a-zA-Z0-9_-]{20,}['\"]?"
+    "export\\s+[A-Z_]*[Tt][Oo][Kk][Ee][Nn][A-Z_]*\\s*=\\s*['\"]?[a-zA-Z0-9_-]{20,}['\"]?"
+)
+
+# Log file path
+log_file=".git-secrets.log"
+
+# Function to add a pattern if it does not already exist
+add_pattern_if_not_exists() {
+    pattern="$1"
+    existing_patterns=$(git secrets --list 2>>"$log_file")
+    
+    if echo "$existing_patterns" | grep -Fqe "$pattern"; then
+        echo -e "${YELLOW}⚠️  Pattern already exists (skipping): ${pattern:0:50}...${NC}"
+    else
+        echo -e "${BLUE}➕ Adding new pattern: ${pattern:0:50}...${NC}"
+        git secrets --add "$pattern" 2>>"$log_file"
+        if [ $? -eq 0 ]; then
+            echo -e "${GREEN}✅ Pattern added successfully${NC}"
+        else
+            echo -e "${RED}❌ Failed to add pattern${NC}"
+            exit 1
+        fi
+    fi
+}
+
+# Add all custom patterns
+echo -e "${BLUE}🔍 Adding custom security patterns for infrastructure...${NC}"
+for pattern in "${patterns[@]}"; do
+    add_pattern_if_not_exists "$pattern"
+done
+
+# Add allowed patterns (whitelist for false positives)
+echo -e "${BLUE}🔍 Adding allowed patterns (whitelist)...${NC}"
+
+# Allow example/placeholder values
+git secrets --add --allowed "your-proxmox-host.local" 2>>"$log_file"
+git secrets --add --allowed "your_proxmox_ip_here" 2>>"$log_file"
+git secrets --add --allowed "your-api-token-here" 2>>"$log_file"
+git secrets --add --allowed "your_api_token_id=your-secret-here" 2>>"$log_file"
+git secrets --add --allowed "example.com" 2>>"$log_file"
+git secrets --add --allowed "localhost" 2>>"$log_file"
+git secrets --add --allowed "127.0.0.1" 2>>"$log_file"
+git secrets --add --allowed "password.*placeholder" 2>>"$log_file"
+git secrets --add --allowed "secret.*example" 2>>"$log_file"
+
+echo -e "${BLUE}🔍 Running git-secrets scan...${NC}"
+
+# Scan the entire repository
+if git-secrets --scan -r; then
+    echo -e "${GREEN}✅ No secrets detected in repository${NC}"
+else
+    echo -e "${RED}❌ SECURITY ALERT: Potential secrets detected!${NC}"
+    echo -e "${YELLOW}Please review the above output and remove any sensitive data before committing.${NC}"
+    echo -e "${BLUE}💡 If these are false positives, you can add them to the allowed list in .husky/pre-commit${NC}"
+    exit 1
+fi
+
+# Run additional infrastructure validation
+echo -e "${BLUE}🔧 Running infrastructure validation...${NC}"
+
+# Check for common infrastructure misconfigurations
+echo -e "${BLUE}🔍 Checking for infrastructure security issues...${NC}"
+
+# Check for hardcoded IPs (excluding allowed ones)
+if grep -r --include="*.tf" --include="*.yml" --include="*.yaml" --include="*.json" \
+   -E "([0-9]{1,3}\.){3}[0-9]{1,3}" . | \
+   grep -v "127.0.0.1" | \
+   grep -v "0.0.0.0" | \
+   grep -v "192.168.1.100" | \
+   grep -v "example" | \
+   grep -v "placeholder" | \
+   head -5; then
+    echo -e "${YELLOW}⚠️  Found potential hardcoded IP addresses. Please verify these are intentional.${NC}"
+fi
+
+# Check for unencrypted HTTP URLs in production configs
+if grep -r --include="*.tf" --include="*.yml" --include="*.yaml" \
+   "http://[^l]" . | \
+   grep -v "localhost" | \
+   grep -v "example" | \
+   head -3; then
+    echo -e "${YELLOW}⚠️  Found HTTP URLs. Consider using HTTPS for production.${NC}"
+fi
+
+echo -e "${GREEN}🎉 Security checks completed successfully!${NC}"
+echo -e "${BLUE}📝 Proceeding with commit...${NC}"
+
+# Run any additional tests
+npm test
