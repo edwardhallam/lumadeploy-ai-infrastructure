@@ -17,7 +17,9 @@ jobs:
         echo "workflow_conclusion=${{ github.event.workflow_run.conclusion }}" >> $GITHUB_OUTPUT
         echo "workflow_url=${{ github.event.workflow_run.html_url }}" >> $GITHUB_OUTPUT
         echo "commit_sha=${{ github.event.workflow_run.head_sha }}" >> $GITHUB_OUTPUT
-        echo "commit_message=${{ github.event.workflow_run.head_commit.message }}" >> $GITHUB_OUTPUT
+        # Extract only the first line of commit message to avoid multiline issues
+        commit_message="${{ github.event.workflow_run.head_commit.message }}"
+        echo "commit_message=${commit_message%%$'\n'*}" >> $GITHUB_OUTPUT
         echo "actor=${{ github.event.workflow_run.triggering_actor.login }}" >> $GITHUB_OUTPUT
         echo "branch=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
 
