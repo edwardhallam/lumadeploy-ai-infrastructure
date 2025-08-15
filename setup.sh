@@ -1,11 +1,8 @@
 #!/bin/bash
+# LumaDeploy AI Service Builder - Interactive Setup Script
+# This script helps you configure and deploy your AI infrastructure
 
-# AI Infrastructure Platform Setup Script - GitOps Edition
-# ======================================================
-# This script is designed to work seamlessly with Cursor's AI assistance
-# Cursor will guide users through this process and generate IaC configurations
-
-set -e  # Exit on any error
+set -e
 
 # Colors for output
 RED='\033[0;31m'
@@ -13,9 +10,27 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 PURPLE='\033[0;35m'
+CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
-# Function to print colored output
+# ASCII Art Banner
+print_banner() {
+    echo -e "${PURPLE}"
+    cat << "EOF"
+    ██╗     ██╗   ██╗███╗   ███╗ █████╗ ██████╗ ███████╗██████╗ ██╗      ██████╗ ██╗   ██╗
+    ██║     ██║   ██║████╗ ████║██╔══██╗██╔══██╗██╔════╝██╔══██╗██║     ██╔═══██╗╚██╗ ██╔╝
+    ██║     ██║   ██║██╔████╔██║███████║██║  ██║█████╗  ██████╔╝██║     ██║   ██║ ╚████╔╝ 
+    ██║     ██║   ██║██║╚██╔╝██║██╔══██║██║  ██║██╔══╝  ██╔═══╝ ██║     ██║   ██║  ╚██╔╝  
+    ███████╗╚██████╔╝██║ ╚═╝ ██║██║  ██║██████╔╝███████╗██║     ███████╗╚██████╔╝   ██║   
+    ╚══════╝ ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═╝╚═════╝ ╚══════╝╚═╝     ╚══════╝ ╚═════╝    ╚═╝   
+                                                                                            
+                            AI Service Builder
+EOF
+    echo -e "${NC}"
+    echo -e "${CYAN}🚀 Professional AI Infrastructure Platform with Cursor-Guided Deployment${NC}"
+    echo ""
+}
+
 print_status() {
     echo -e "${BLUE}[INFO]${NC} $1"
 }
@@ -36,952 +51,388 @@ print_cursor_tip() {
     echo -e "${PURPLE}[CURSOR TIP]${NC} $1"
 }
 
-# Function to check prerequisites
+# Check if we're in the right directory
+check_directory() {
+    if [[ ! -f "README.md" ]] || [[ ! -d "terraform" ]]; then
+        print_error "Please run this script from the LumaDeploy root directory"
+        exit 1
+    fi
+}
+
+# Check prerequisites
 check_prerequisites() {
-    print_status "Checking prerequisites..."
+    print_status "🔍 Checking prerequisites..."
     
-    # Check Python
-    if ! command -v python3 &> /dev/null; then
-        print_error "Python 3 is not installed. Please install Python 3.8+ first."
-        print_cursor_tip "Ask Cursor: 'Help me install Python 3.8+ on my system'"
-        exit 1
-    fi
+    local missing_tools=()
     
-    # Check Python version
-    PYTHON_VERSION=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
-    if python3 -c "import sys; exit(0 if sys.version_info >= (3, 8) else 1)"; then
-        print_success "Python $PYTHON_VERSION detected ✓"
-    else
-        print_error "Python 3.8+ required, found $PYTHON_VERSION"
-        print_cursor_tip "Ask Cursor: 'Help me upgrade Python to version 3.8 or higher'"
-        exit 1
-    fi
-    
-    # Check Git
+    # Check for required tools
     if ! command -v git &> /dev/null; then
-        print_error "Git is not installed. Please install Git first."
-        print_cursor_tip "Ask Cursor: 'Help me install Git on my system'"
+        missing_tools+=("git")
+    fi
+    
+    if ! command -v python3 &> /dev/null; then
+        missing_tools+=("python3")
+    fi
+    
+    if ! command -v terraform &> /dev/null; then
+        print_warning "Terraform not found. You'll need it for infrastructure deployment."
+        print_cursor_tip "Ask Cursor: 'Help me install Terraform on my system'"
+    fi
+    
+    if ! command -v ansible &> /dev/null; then
+        print_warning "Ansible not found. You'll need it for configuration management."
+        print_cursor_tip "Ask Cursor: 'Help me install Ansible on my system'"
+    fi
+    
+    if ! command -v kubectl &> /dev/null; then
+        print_warning "kubectl not found. You'll need it for Kubernetes management."
+        print_cursor_tip "Ask Cursor: 'Help me install kubectl on my system'"
+    fi
+    
+    if [[ ${#missing_tools[@]} -gt 0 ]]; then
+        print_error "Missing required tools: ${missing_tools[*]}"
+        print_cursor_tip "Ask Cursor: 'Help me install the missing prerequisites for LumaDeploy'"
         exit 1
     fi
-    print_success "Git detected ✓"
     
-    # Check Make
-    if ! command -v make &> /dev/null; then
-        print_warning "Make is not installed. Installing..."
-        if [[ "$OSTYPE" == "darwin"* ]]; then
-            # macOS
-            if command -v brew &> /dev/null; then
-                brew install make
-            else
-                print_error "Please install Homebrew first: https://brew.sh/"
-                print_cursor_tip "Ask Cursor: 'Help me install Homebrew and then Make on macOS'"
-                exit 1
-            fi
-        elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-            # Linux
-            if command -v apt-get &> /dev/null; then
-                sudo apt-get update && sudo apt-get install -y make
-            elif command -v yum &> /dev/null; then
-                sudo yum install -y make
-            else
-                print_error "Please install make manually for your distribution"
-                print_cursor_tip "Ask Cursor: 'Help me install Make on my Linux distribution'"
-                exit 1
-            fi
-        fi
-    fi
-    print_success "Make detected ✓"
-    
-    # Check Terraform
-    if ! command -v terraform &> /dev/null; then
-        print_warning "Terraform is not installed. Installing..."
-        if [[ "$OSTYPE" == "darwin"* ]]; then
-            # macOS
-            if command -v brew &> /dev/null; then
-                brew tap hashicorp/tap
-                brew install hashicorp/tap/terraform
-            else
-                print_error "Please install Homebrew first: https://brew.sh/"
-                print_cursor_tip "Ask Cursor: 'Help me install Homebrew and then Terraform on macOS'"
-                exit 1
-            fi
-        elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-            # Linux
-            wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
-            echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
-            sudo apt update && sudo apt install terraform
-        fi
-    fi
-    print_success "Terraform detected ✓"
-    
-    # Check Ansible
-    if ! command -v ansible &> /dev/null; then
-        print_warning "Ansible is not installed. Installing..."
-        if [[ "$OSTYPE" == "darwin"* ]]; then
-            # macOS
-            if command -v brew &> /dev/null; then
-                brew install ansible
-            else
-                print_error "Please install Homebrew first: https://brew.sh/"
-                print_cursor_tip "Ask Cursor: 'Help me install Homebrew and then Ansible on macOS'"
-                exit 1
-            fi
-        elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-            # Linux
-            sudo apt-get update
-            sudo apt-get install -y software-properties-common
-            sudo apt-add-repository --yes --update ppa:ansible/ansible
-            sudo apt-get install -y ansible
-        fi
-    fi
-    print_success "Ansible detected ✓"
+    print_success "All basic prerequisites found"
 }
 
-# Function to install Python dependencies
-install_dependencies() {
-    print_status "Installing Python dependencies..."
+# Setup Python virtual environment
+setup_python_env() {
+    print_status "🐍 Setting up Python environment..."
     
-    # Create virtual environment if it doesn't exist
-    if [ ! -d "venv" ]; then
-        print_status "Creating Python virtual environment..."
+    if [[ ! -d "venv" ]]; then
         python3 -m venv venv
-        print_success "Virtual environment created ✓"
-        print_cursor_tip "Cursor will automatically activate this environment for you"
+        print_success "Created Python virtual environment"
     fi
     
-    # Activate virtual environment and install dependencies
-    if [ -f "requirements.txt" ]; then
-        print_status "Installing Python dependencies in virtual environment..."
-        source venv/bin/activate
-        python3 -m pip install -r requirements.txt
-        print_success "Python dependencies installed ✓"
+    source venv/bin/activate
+    
+    if [[ -f "proxmox/python-tools/requirements.txt" ]]; then
+        pip install -r proxmox/python-tools/requirements.txt
+        print_success "Installed Python dependencies"
+    fi
+}
+
+# Setup security
+setup_security() {
+    print_status "🔐 Setting up security features..."
+    
+    if [[ -f "setup-security.sh" ]]; then
+        print_cursor_tip "Running security setup. This will install git-secrets and configure pre-commit hooks."
+        ./setup-security.sh
     else
-        print_warning "No requirements.txt found, skipping Python dependencies"
+        print_warning "Security setup script not found. Manual security configuration may be needed."
     fi
 }
 
-# Function to get user input with validation
-get_input() {
-    local prompt="$1"
-    local default="$2"
-    local validation="$3"
-    local env_var="$4"
-    local cursor_help="$5"
+# Interactive configuration
+interactive_config() {
+    print_status "⚙️ Interactive Configuration Setup"
+    echo ""
+    print_cursor_tip "You can ask Cursor to help you with any of these configuration questions!"
+    echo ""
     
-    # Check if environment variable is set (for non-interactive mode)
-    if [ -n "$env_var" ] && [ -n "${!env_var}" ]; then
-        echo "${!env_var}"
-        return 0
-    fi
+    # Proxmox Configuration
+    echo -e "${CYAN}📡 Proxmox Configuration${NC}"
+    echo "Please provide your Proxmox server details:"
+    echo ""
     
-    # Show Cursor help if provided
-    if [ -n "$cursor_help" ]; then
-        print_cursor_tip "$cursor_help"
-    fi
+    read -p "Proxmox host IP or hostname: " proxmox_host
+    read -p "Proxmox node name (default: pve01): " proxmox_node
+    proxmox_node=${proxmox_node:-pve01}
     
-    while true; do
-        if [ -n "$default" ]; then
-            read -p "$prompt [$default]: " input
-            input=${input:-$default}
-        else
-            read -p "$prompt: " input
-        fi
-        
-        if [ -n "$validation" ]; then
-            if eval "$validation"; then
-                break
-            else
-                print_error "Invalid input. Please try again."
-                print_cursor_tip "Ask Cursor for help with this configuration"
-            fi
-        else
-            break
-        fi
-    done
+    read -p "Proxmox API token ID (root@pam!token-name): " proxmox_user
+    read -s -p "Proxmox API token secret: " proxmox_password
+    echo ""
     
-    echo "$input"
+    # Network Configuration
+    echo ""
+    echo -e "${CYAN}🌐 Network Configuration${NC}"
+    read -p "Network gateway (e.g., 192.168.1.1): " network_gateway
+    read -p "Network subnet (e.g., 192.168.1.0/24): " network_subnet
+    
+    # Resource Configuration
+    echo ""
+    echo -e "${CYAN}💾 Resource Configuration${NC}"
+    read -p "Storage pool name (default: local-lvm): " storage_pool
+    storage_pool=${storage_pool:-local-lvm}
+    
+    read -p "Total CPU cores available for K3s (default: 10): " total_cpu
+    total_cpu=${total_cpu:-10}
+    
+    read -p "Total memory available for K3s in GB (default: 24): " total_memory_gb
+    total_memory_gb=${total_memory_gb:-24}
+    total_memory=$((total_memory_gb * 1024))
+    
+    # AI Services Configuration
+    echo ""
+    echo -e "${CYAN}🤖 AI Services Configuration${NC}"
+    read -p "Deploy Ollama for local LLMs? (y/n, default: y): " deploy_ollama
+    deploy_ollama=${deploy_ollama:-y}
+    
+    read -p "Deploy LibreChat web interface? (y/n, default: y): " deploy_librechat
+    deploy_librechat=${deploy_librechat:-y}
+    
+    read -p "Number of MCP servers to deploy (default: 5): " mcp_count
+    mcp_count=${mcp_count:-5}
+    
+    # Generate configuration files
+    generate_terraform_config
+    generate_ansible_config
+    
+    print_success "Configuration files generated successfully!"
+    print_cursor_tip "Your configuration is ready! Ask Cursor: 'Help me review and deploy my LumaDeploy configuration'"
 }
 
-# Function to validate IP address
-validate_ip() {
-    local ip="$1"
-    if [[ $ip =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-        IFS='.' read -ra ADDR <<< "$ip"
-        for i in "${ADDR[@]}"; do
-            if [ "$i" -gt 255 ] || [ "$i" -lt 0 ]; then
-                return 1
-            fi
-        done
-        return 0
-    fi
-    return 1
-}
-
-# Function to validate subnet
-validate_subnet() {
-    local subnet="$1"
-    if [[ $subnet =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/[0-9]{1,2}$ ]]; then
-        return 0
-    fi
-    return 1
-}
-
-# Function to create Terraform variables file
-create_terraform_vars() {
-    print_status "Creating Terraform variables file..."
+# Generate Terraform configuration
+generate_terraform_config() {
+    print_status "📝 Generating Terraform configuration..."
     
-    cat > infrastructure/config/terraform.tfvars << EOF
-# Proxmox Configuration
-proxmox_host = "$PROXMOX_HOST"
-proxmox_user = "$PROXMOX_USER"
-proxmox_password = "$PROXMOX_PASS"
-proxmox_node = "$PROXMOX_NODE"
-proxmox_port = 8006
-
-# Network Configuration
-network_gateway = "$NETWORK_GATEWAY"
-network_subnet = "$NETWORK_SUBNET"
-dns_servers = ["$DNS_SERVERS"]
-
-# Resource Allocation
-container_cpu_limit = $CONTAINER_CPU_LIMIT
-container_memory_limit = $CONTAINER_MEMORY_LIMIT
-container_storage_limit = $CONTAINER_STORAGE_LIMIT
-
-# Storage Configuration
-storage_pool = "$STORAGE_POOL"
-
-# Container Configuration
-librechat_container_name = "$LIBRECHAT_CONTAINER_NAME"
-mcp_server_container_name = "$MCP_SERVER_CONTAINER_NAME"
-
-# Cloudflare Configuration
-use_cloudflare = $USE_CLOUDFLARE
-cloudflare_zone_id = "$CLOUDFLARE_ZONE_ID"
-cloudflare_account_id = "$CLOUDFLARE_ACCOUNT_ID"
-EOF
-
-    print_success "Terraform variables file created ✓"
-    print_cursor_tip "Cursor can help you modify these settings later if needed"
-}
-
-# Function to create Ansible variables file
-create_ansible_vars() {
-    print_status "Creating Ansible variables file..."
-    
-    cat > infrastructure/config/ansible-vars.yml << EOF
----
-# Ansible Variables for AI Infrastructure Platform
+    cat > config/terraform.tfvars << EOF
+# LumaDeploy AI Service Builder - Generated Configuration
+# Generated on $(date)
 
 # Proxmox Connection
-proxmox_host: "$PROXMOX_HOST"
-proxmox_user: "$PROXMOX_USER"
-proxmox_node: "$PROXMOX_NODE"
+proxmox_host     = "$proxmox_host"
+proxmox_port     = 8006
+proxmox_node     = "$proxmox_node"
+proxmox_user     = "$proxmox_user"
+proxmox_password = "$proxmox_password"
 
 # Network Configuration
-network_gateway: "$NETWORK_GATEWAY"
-network_subnet: "$NETWORK_SUBNET"
-dns_servers: ["$DNS_SERVERS"]
+network_gateway = "$network_gateway"
+network_subnet  = "$network_subnet"
+dns_servers     = ["8.8.8.8", "8.8.4.4"]
 
-# Container Configuration
+# Storage Configuration
+storage_pool = "$storage_pool"
+
+# K3s Cluster Configuration
+k3s_master_vm_name    = "k3s-master"
+k3s_master_cpu_cores  = 2
+k3s_master_memory_mb  = 4096
+k3s_master_disk_gb    = 30
+
+k3s_worker_count      = 2
+k3s_worker_vm_name    = "k3s-worker"
+k3s_worker_cpu_cores  = 4
+k3s_worker_memory_mb  = 8192
+k3s_worker_disk_gb    = 50
+
+# HAProxy Load Balancer
+haproxy_lb_container_name = "haproxy-lb"
+haproxy_lb_cpu_cores      = 1
+haproxy_lb_memory_mb      = 2048
+haproxy_lb_disk_gb        = 10
+
+# VM Authentication
+vm_username       = "ubuntu"
+vm_password       = "lumadeploy-$(date +%s)"
+vm_ssh_public_key = "$(cat ~/.ssh/id_rsa.pub 2>/dev/null || echo 'REPLACE-WITH-YOUR-SSH-PUBLIC-KEY')"
+
+# IP Address Allocation
+k3s_master_ip_offset   = 20
+k3s_worker_ip_offset   = 21
+haproxy_lb_ip_offset   = 19
+
+# AI Services Configuration
+ollama_enabled    = $([ "$deploy_ollama" = "y" ] && echo "true" || echo "false")
+librechat_enabled = $([ "$deploy_librechat" = "y" ] && echo "true" || echo "false")
+mcp_server_count  = $mcp_count
+
+# Resource Limits
+total_cpu_limit    = $total_cpu
+total_memory_limit = $total_memory
+EOF
+}
+
+# Generate Ansible configuration
+generate_ansible_config() {
+    print_status "📝 Generating Ansible configuration..."
+    
+    cat > config/ansible-vars.yml << EOF
+# LumaDeploy AI Service Builder - Generated Configuration
+# Generated on $(date)
+
+# K3s Cluster Configuration
+k3s_version: "v1.29.4+k3s1"
+k3s_token: "lumadeploy-$(openssl rand -hex 16)"
+k3s_cluster_cidr: "10.42.0.0/16"
+k3s_service_cidr: "10.43.0.0/16"
+
+# HAProxy Configuration
+haproxy_frontend_port: 6443
+haproxy_backend_port: 6443
+haproxy_stats_port: 8080
+haproxy_stats_user: "admin"
+haproxy_stats_password: "lumadeploy-$(openssl rand -hex 8)"
+
+# Ollama Configuration
+ollama:
+  enabled: $([ "$deploy_ollama" = "y" ] && echo "true" || echo "false")
+  models:
+    - "llama3.1:8b"
+    - "codellama:7b"
+  memory_limit: "8Gi"
+  cpu_limit: "4"
+
+# LibreChat Configuration
 librechat:
-  container_name: "$LIBRECHAT_CONTAINER_NAME"
-  web_port: 3000
-  admin_email: "admin@example.com"
-  admin_password: "changeme123"
+  enabled: $([ "$deploy_librechat" = "y" ] && echo "true" || echo "false")
+  admin_email: "admin@lumadeploy.local"
+  app_title: "LumaDeploy AI Chat"
 
-mcp_server:
-  container_name: "$MCP_SERVER_CONTAINER_NAME"
-  api_port: 8000
-  model_name: "gpt-3.5-turbo"
-  api_key: "your-openai-api-key"
+# MCP Servers Configuration
+mcp_servers:
+  count: $mcp_count
+  base_port: 3000
+  memory_limit: "1Gi"
+  cpu_limit: "500m"
 
+# Monitoring Configuration
 monitoring:
-  container_name: "monitoring"
-  prometheus_port: 9090
-  grafana_port: 3000
-  grafana_admin_password: "changeme123"
-
-reverse_proxy:
-  container_name: "reverse-proxy"
-  http_port: 80
-  https_port: 443
-  ssl_cert_email: "admin@example.com"
+  prometheus:
+    enabled: true
+    retention: "30d"
+  grafana:
+    enabled: true
+    admin_password: "lumadeploy-$(openssl rand -hex 8)"
 
 # Security Configuration
 security:
   firewall_enabled: true
   ssh_port: 22
-  allowed_ports: [80, 443, 3000, 8000, 9090]
-  
-# Backup Configuration
-backup:
-  enabled: true
-  retention_days: 7
-  schedule: "0 2 * * *"  # Daily at 2 AM
+  fail2ban_enabled: true
 EOF
-
-    print_success "Ansible variables file created ✓"
 }
 
-# Function to create environment file for local development
-create_env_file() {
-    print_status "Creating environment configuration..."
-    
-    cat > .env << EOF
-# AI Infrastructure Platform Configuration
-# ======================================
-# Generated by setup.sh - DO NOT edit manually
-# Cursor will help you modify this file if needed
-
-# Environment
-ENVIRONMENT=production
-PROJECT_NAME=ai-infrastructure
-LOG_LEVEL=INFO
-
-# Proxmox Configuration
-PROXMOX_HOST=$PROXMOX_HOST
-PROXMOX_USER=$PROXMOX_USER
-PROXMOX_PASS=$PROXMOX_PASS
-PROXMOX_NODE=$PROXMOX_NODE
-PROXMOX_PORT=8006
-
-# Network Configuration
-NETWORK_GATEWAY=$NETWORK_GATEWAY
-NETWORK_SUBNET=$NETWORK_SUBNET
-DNS_SERVERS=$DNS_SERVERS
-
-# Resource Allocation
-CONTAINER_CPU_LIMIT=$CONTAINER_CPU_LIMIT
-CONTAINER_MEMORY_LIMIT=$CONTAINER_MEMORY_LIMIT
-CONTAINER_STORAGE_LIMIT=$CONTAINER_STORAGE_LIMIT
-
-# Storage Configuration
-STORAGE_POOL=$STORAGE_POOL
-
-# Container Names
-LIBRECHAT_CONTAINER_NAME=$LIBRECHAT_CONTAINER_NAME
-MCP_SERVER_CONTAINER_NAME=$MCP_SERVER_CONTAINER_NAME
-
-# Cloudflare Configuration
-USE_CLOUDFLARE=$USE_CLOUDFLARE
-CLOUDFLARE_API_TOKEN=$CLOUDFLARE_API_TOKEN
-CLOUDFLARE_ZONE_ID=$CLOUDFLARE_ZONE_ID
-CLOUDFLARE_ACCOUNT_ID=$CLOUDFLARE_ACCOUNT_ID
-
-# Security Settings
-SECURITY_SCAN_ENABLED=true
-SECURITY_ALERT_LEVEL=medium
-
-# Backup Configuration
-BACKUP_ENABLED=true
-BACKUP_RETENTION_DAYS=7
-EOF
-
-    print_success "Environment file created ✓"
-}
-
-# Function to create Makefile
+# Create Makefile for easy commands
 create_makefile() {
-    print_status "Creating Makefile..."
+    print_status "📋 Creating Makefile for easy commands..."
     
     cat > Makefile << 'EOF'
-# AI Infrastructure Platform Makefile - GitOps Edition
-# ===================================================
-# Cursor will help you use these commands
+# LumaDeploy AI Service Builder - Makefile
+# Use these commands to manage your AI infrastructure
 
-.PHONY: setup deploy destroy status logs help plan validate
+.PHONY: help setup validate plan deploy status logs destroy clean
+
+# Default target
+help:
+	@echo "🚀 LumaDeploy AI Service Builder"
+	@echo ""
+	@echo "Available commands:"
+	@echo "  make setup     - Run interactive setup"
+	@echo "  make validate  - Validate Terraform and Ansible configs"
+	@echo "  make plan      - Plan Terraform deployment"
+	@echo "  make deploy    - Deploy infrastructure"
+	@echo "  make status    - Check infrastructure status"
+	@echo "  make logs      - View deployment logs"
+	@echo "  make destroy   - Destroy infrastructure"
+	@echo "  make clean     - Clean temporary files"
+	@echo ""
+	@echo "💡 Ask Cursor: 'Help me understand these LumaDeploy commands'"
 
 setup:
-	@echo "🚀 Setting up AI Infrastructure Platform..."
-	@chmod +x setup.sh
-	@./setup.sh
-
-plan:
-	@echo "📋 Planning infrastructure deployment..."
-	@cd infrastructure/terraform && terraform plan -var-file="../config/terraform.tfvars"
+	@echo "🔧 Running LumaDeploy setup..."
+	./setup.sh
 
 validate:
-	@echo "🔍 Validating configuration..."
-	@cd infrastructure/terraform && terraform validate
-	@cd infrastructure/ansible && ansible-playbook --syntax-check site.yml
+	@echo "✅ Validating configuration..."
+	@cd terraform && terraform fmt -check
+	@cd terraform && terraform validate
+	@ansible-playbook --syntax-check ansible/site.yml
+	@echo "✅ Configuration is valid"
+
+plan:
+	@echo "📋 Planning deployment..."
+	@cd terraform && terraform init
+	@cd terraform && terraform plan -var-file="../config/terraform.tfvars"
 
 deploy:
-	@echo "🚀 Deploying AI infrastructure..."
-	@echo "💡 This will trigger GitHub Actions to deploy your infrastructure"
-	@echo "📝 Make sure to commit and push your configuration changes first:"
-	@echo "   git add infrastructure/config/"
-	@echo "   git commit -m 'Deploy AI infrastructure'"
-	@echo "   git push origin main"
-
-destroy:
-	@echo "🗑️  Destroying infrastructure..."
-	@echo "⚠️  WARNING: This will permanently delete all infrastructure!"
-	@echo "💡 Use GitHub Actions to destroy infrastructure safely"
-	@echo "   Go to Actions tab and run the 'destroy' workflow"
+	@echo "🚀 Deploying LumaDeploy infrastructure..."
+	./scripts/deploy.sh
 
 status:
 	@echo "📊 Checking infrastructure status..."
-	@cd infrastructure/terraform && terraform show
+	@cd terraform && terraform show
+	@kubectl get nodes 2>/dev/null || echo "Kubernetes not accessible"
 
 logs:
-	@echo "📋 Showing deployment logs..."
-	@echo "💡 Check GitHub Actions for deployment logs:"
-	@echo "   https://github.com/$(shell git config --get remote.origin.url | sed 's/.*github.com[:/]\([^/]*\/[^/]*\).*/\1/')/actions"
+	@echo "📝 Viewing deployment logs..."
+	@tail -f /tmp/lumadeploy-deploy.log 2>/dev/null || echo "No deployment logs found"
 
-test-connection:
-	@echo "🧪 Testing Proxmox connection..."
-	@cd infrastructure/terraform && terraform output
+destroy:
+	@echo "💥 Destroying infrastructure..."
+	@read -p "Are you sure you want to destroy the infrastructure? (yes/no): " confirm && [ "$$confirm" = "yes" ]
+	@cd terraform && terraform destroy -var-file="../config/terraform.tfvars"
 
-activate:
-	@echo "🐍 Activating Python virtual environment..."
-	@echo "Run: source venv/bin/activate"
-	@echo "Then you can use python3 commands directly"
-
-help:
-	@echo "AI Infrastructure Platform Commands (GitOps Edition):"
-	@echo "===================================================="
-	@echo "  setup             Interactive configuration setup"
-	@echo "  plan              Plan Terraform deployment"
-	@echo "  validate          Validate Terraform and Ansible configs"
-	@echo "  deploy            Deploy via GitHub Actions (commit & push)"
-	@echo "  destroy           Destroy via GitHub Actions"
-	@echo "  status            Show infrastructure status"
-	@echo "  logs              Show deployment logs (GitHub Actions)"
-	@echo "  test-connection   Test Proxmox connectivity"
-	@echo "  activate          Show how to activate virtual environment"
-	@echo "  help              Show this help message"
-	@echo ""
-	@echo "💡 Tip: Ask Cursor to help you with any of these commands!"
-	@echo "🚀 GitOps Workflow: Edit config → Commit → Push → Auto-deploy"
+clean:
+	@echo "🧹 Cleaning temporary files..."
+	@rm -rf terraform/.terraform
+	@rm -f terraform/terraform.tfstate*
+	@rm -f /tmp/lumadeploy-*.log
+	@echo "✅ Cleanup complete"
 EOF
-
-    print_success "Makefile created ✓"
+    
+    print_success "Makefile created"
 }
 
-# Function to create requirements.txt
-create_requirements() {
-    print_status "Creating Python requirements..."
-    
-    cat > requirements.txt << 'EOF'
-# AI Infrastructure Platform Dependencies
-# ======================================
-# Cursor will help you install and manage these dependencies
-
-# Core dependencies
-requests>=2.31.0
-pyyaml>=6.0
-urllib3>=2.0.0
-python-dotenv>=1.0.0
-pydantic>=2.0.0
-
-# Proxmox API
-proxmoxer>=1.4.0
-
-# Cloudflare integration
-cloudflare>=2.19.0
-
-# Logging and monitoring
-structlog>=23.0.0
-colorama>=0.4.6
-
-# Development and testing (optional)
-pytest>=7.0.0
-pytest-cov>=4.0.0
-EOF
-
-    print_success "Requirements file created ✓"
+# Show next steps
+show_next_steps() {
+    echo ""
+    echo -e "${GREEN}🎉 LumaDeploy Setup Complete!${NC}"
+    echo ""
+    echo -e "${CYAN}📋 Next Steps:${NC}"
+    echo ""
+    echo "1. 📝 Review your configuration:"
+    echo "   - config/terraform.tfvars"
+    echo "   - config/ansible-vars.yml"
+    echo ""
+    echo "2. 🔍 Validate your setup:"
+    echo "   make validate"
+    echo ""
+    echo "3. 📋 Plan your deployment:"
+    echo "   make plan"
+    echo ""
+    echo "4. 🚀 Deploy your AI infrastructure:"
+    echo "   make deploy"
+    echo ""
+    echo "5. 📊 Monitor your deployment:"
+    echo "   make status"
+    echo ""
+    echo -e "${PURPLE}💡 Cursor Integration:${NC}"
+    echo "Ask Cursor any of these questions:"
+    echo "• 'Help me review my LumaDeploy configuration'"
+    echo "• 'Guide me through deploying my AI infrastructure'"
+    echo "• 'Help me troubleshoot any deployment issues'"
+    echo "• 'Show me how to access my deployed AI services'"
+    echo ""
+    echo -e "${YELLOW}⚠️  Important:${NC}"
+    echo "• Keep your API tokens and passwords secure"
+    echo "• Review the generated configuration before deployment"
+    echo "• Ensure your Proxmox server has sufficient resources"
+    echo ""
+    print_cursor_tip "Ready to deploy? Ask Cursor: 'Help me deploy LumaDeploy step by step'"
 }
 
-# Function to create main.py
-create_main_py() {
-    print_status "Creating main deployment script..."
-    
-    cat > main.py << 'EOF'
-#!/usr/bin/env python3
-"""
-AI Infrastructure Platform - Main Deployment Script (GitOps Edition)
-==================================================================
-Handles the deployment and management of AI infrastructure on Proxmox.
-This script is now primarily for local development and testing.
-For production deployment, use the GitOps workflow with GitHub Actions.
-Cursor will help you use this script and understand the GitOps process.
-"""
-
-import os
-import sys
-import logging
-import argparse
-from pathlib import Path
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('deployment.log'),
-        logging.StreamHandler(sys.stdout)
-    ]
-)
-
-logger = logging.getLogger(__name__)
-
-def plan():
-    """Plan Terraform deployment."""
-    logger.info("📋 Planning Terraform deployment...")
-    
-    # TODO: Implement Terraform plan execution
-    logger.info("💡 Use 'make plan' or GitHub Actions for Terraform planning")
-    logger.info("💡 Ask Cursor: 'Help me plan the Terraform deployment'")
-
-def deploy():
-    """Deploy the AI infrastructure via GitOps."""
-    logger.info("🚀 Starting AI infrastructure deployment via GitOps...")
-    
-    # Validate configuration
-    if not validate_config():
-        logger.error("❌ Configuration validation failed")
-        logger.info("💡 Ask Cursor to help you fix the configuration")
-        sys.exit(1)
-    
-    logger.info("✅ Configuration validated!")
-    logger.info("💡 To deploy, commit and push your changes:")
-    logger.info("   git add infrastructure/config/")
-    logger.info("   git commit -m 'Deploy AI infrastructure'")
-    logger.info("   git push origin main")
-    logger.info("💡 GitHub Actions will automatically deploy your infrastructure")
-
-def destroy():
-    """Destroy infrastructure via GitOps."""
-    logger.info("🗑️  To destroy infrastructure, use GitHub Actions:")
-    logger.info("💡 Go to Actions tab and run the 'destroy' workflow")
-    logger.info("💡 This ensures safe, tracked infrastructure removal")
-
-def status():
-    """Check infrastructure status."""
-    logger.info("📊 Checking infrastructure status...")
-    
-    # TODO: Implement status checking
-    logger.info("💡 Use 'make status' or check GitHub Actions for deployment status")
-    logger.info("💡 Ask Cursor: 'Help me check the infrastructure status'")
-
-def logs():
-    """Show deployment logs."""
-    logger.info("📋 For deployment logs, check GitHub Actions:")
-    logger.info("💡 https://github.com/[your-repo]/actions")
-    logger.info("💡 This provides the complete deployment history and logs")
-
-def test_connection():
-    """Test Proxmox connection."""
-    logger.info("🧪 Testing Proxmox connectivity...")
-    
-    # TODO: Implement actual Proxmox connection test
-    logger.info("💡 Use 'make test-connection' to test Proxmox connectivity")
-    logger.info("💡 Ask Cursor: 'Help me test the Proxmox connection'")
-
-def validate_config():
-    """Validate configuration files."""
-    logger.info("🔍 Validating configuration...")
-    
-    required_files = [
-        'infrastructure/config/terraform.tfvars',
-        'infrastructure/config/ansible-vars.yml',
-        '.env'
-    ]
-    
-    missing_files = []
-    for file_path in required_files:
-        if not Path(file_path).exists():
-            missing_files.append(file_path)
-    
-    if missing_files:
-        logger.error(f"Missing required configuration files: {', '.join(missing_files)}")
-        logger.info("💡 Run './setup.sh' to generate configuration files")
-        logger.info("💡 Ask Cursor: 'Help me run the setup script'")
-        return False
-    
-    logger.info("✅ Configuration validation passed!")
-    return True
-
-def main():
-    """Main entry point."""
-    parser = argparse.ArgumentParser(description='AI Infrastructure Platform (GitOps Edition)')
-    parser.add_argument('command', choices=['plan', 'deploy', 'destroy', 'status', 'logs', 'test-connection'],
-                       help='Command to execute')
-    
-    args = parser.parse_args()
-    
-    try:
-        if args.command == 'plan':
-            plan()
-        elif args.command == 'deploy':
-            deploy()
-        elif args.command == 'destroy':
-            destroy()
-        elif args.command == 'status':
-            status()
-        elif args.command == 'logs':
-            logs()
-        elif args.command == 'test-connection':
-            test_connection()
-    except KeyboardInterrupt:
-        logger.info("🛑 Operation cancelled by user")
-        sys.exit(1)
-    except Exception as e:
-        logger.error(f"❌ Error: {e}")
-        logger.info("💡 Ask Cursor to help you resolve this error")
-        sys.exit(1)
-
-if __name__ == '__main__':
-    main()
-EOF
-
-    print_success "Main deployment script created ✓"
-}
-
-# Function to create documentation
-create_docs() {
-    print_status "Creating documentation..."
-    
-    mkdir -p docs
-    
-    # Create GitOps guide
-    cat > docs/gitops-guide.md << 'EOF'
-# GitOps Deployment Guide
-
-## Overview
-
-This platform uses GitOps principles for infrastructure deployment. Changes are committed to source control and then automatically deployed via GitHub Actions.
-
-## Workflow
-
-1. **Edit Configuration**: Modify files in `infrastructure/config/`
-2. **Commit Changes**: `git add infrastructure/config/ && git commit -m "Update config"`
-3. **Push to Deploy**: `git push origin main` triggers GitHub Actions
-4. **Monitor Deployment**: Check GitHub Actions tab for progress
-
-## Configuration Files
-
-- **`terraform.tfvars`**: Terraform variables for Proxmox infrastructure
-- **`ansible-vars.yml`**: Ansible variables for service configuration
-- **`.env`**: Local environment variables
-
-## GitHub Actions
-
-- **Validate**: Checks configuration syntax
-- **Plan**: Shows what will be deployed
-- **Deploy**: Applies infrastructure changes
-- **Destroy**: Removes infrastructure (manual trigger)
-
-## Benefits
-
-- **Audit Trail**: All changes tracked in git
-- **Rollback**: Revert to previous configurations
-- **Collaboration**: Multiple users can contribute
-- **Automation**: No manual deployment steps
-EOF
-
-    # Create troubleshooting guide
-    cat > docs/troubleshooting.md << 'EOF'
-# Troubleshooting Guide
-
-## Getting Help with Cursor
-
-**The best way to get help is to ask Cursor directly!**
-
-### Common Issues and Solutions
-
-#### Configuration Issues
-
-**Missing Configuration Files**
-- Run `./setup.sh` to generate configuration files
-- Check that `infrastructure/config/` directory exists
-- Verify all required files are present
-- **Ask Cursor**: "Help me generate the configuration files"
-
-**Terraform Validation Errors**
-- Run `make validate` to check syntax
-- Check Terraform and Ansible file formats
-- Verify variable references
-- **Ask Cursor**: "Help me fix the Terraform validation errors"
-
-#### Deployment Issues
-
-**GitHub Actions Failures**
-- Check the Actions tab in GitHub
-- Review error logs and messages
-- Verify secrets are configured correctly
-- **Ask Cursor**: "Help me troubleshoot the GitHub Actions failure"
-
-**Proxmox Connection Issues**
-- Verify Proxmox credentials in GitHub secrets
-- Check network connectivity
-- Ensure Proxmox API is accessible
-- **Ask Cursor**: "Help me fix the Proxmox connection issue"
-
-#### GitOps Workflow Issues
-
-**Changes Not Deploying**
-- Ensure you're pushing to the main branch
-- Check that configuration files are in the right paths
-- Verify GitHub Actions are enabled
-- **Ask Cursor**: "Help me understand why my changes aren't deploying"
-
-## Getting Help
-
-1. **Ask Cursor first** - It's your AI assistant and knows this platform
-2. Check GitHub Actions logs
-3. Review this troubleshooting guide
-4. Open a GitHub issue with error details
-
-## Cursor Commands
-
-**Ask Cursor to:**
-- "Help me understand the GitOps workflow"
-- "Guide me through committing and pushing changes"
-- "Help me troubleshoot this deployment error"
-- "Explain what this GitHub Actions log means"
-EOF
-
-    # Create API reference
-    cat > docs/api.md << 'EOF'
-# API Reference
-
-## Commands
-
-### `make plan`
-Plans the Terraform deployment.
-
-**Usage:**
-```bash
-make plan
-```
-
-**What it does:**
-- Validates Terraform configuration
-- Shows what infrastructure will be created
-- Does not make any changes
-
-**Ask Cursor**: "Help me plan the infrastructure deployment"
-
-### `make deploy`
-Deploys the infrastructure via GitOps.
-
-**Usage:**
-```bash
-make deploy
-```
-
-**What it does:**
-- Guides you through the GitOps workflow
-- Explains commit and push process
-- Triggers GitHub Actions deployment
-
-**Ask Cursor**: "Help me deploy the infrastructure"
-
-### `make validate`
-Validates all configuration files.
-
-**Usage:**
-```bash
-make validate
-```
-
-**What it does:**
-- Checks Terraform syntax
-- Validates Ansible playbooks
-- Ensures configuration is correct
-
-**Ask Cursor**: "Help me validate the configuration"
-
-## GitOps Workflow
-
-### Configuration Management
-- Edit files in `infrastructure/config/`
-- Commit changes with descriptive messages
-- Push to trigger automatic deployment
-
-### Monitoring Deployment
-- Check GitHub Actions tab
-- Review deployment logs
-- Monitor infrastructure status
-
-## Getting Help
-
-**Ask Cursor for help with any command:**
-- "What does this command do?"
-- "Help me run this command"
-- "What's the output mean?"
-- "Help me fix this error"
-EOF
-
-    # Create architecture guide
-    cat > docs/architecture.md << 'EOF'
-# Architecture Overview
-
-## System Components
-
-### Infrastructure Layer (Terraform)
-- **Proxmox Provider**: Manages Proxmox VE resources
-- **LXC Containers**: Lightweight virtualization for AI workloads
-- **Network Configuration**: Bridges, IP addresses, subnets
-- **Storage Management**: Storage pools and volumes
-
-### Application Layer (Ansible)
-- **Container Configuration**: OS setup and package installation
-- **Service Deployment**: LibreChat, MCP server, monitoring
-- **Security Hardening**: Firewall rules and access control
-- **Monitoring Setup**: Logging and health checks
-
-### Orchestration Layer (GitHub Actions)
-- **Configuration Validation**: Syntax and format checking
-- **Infrastructure Planning**: Terraform plan generation
-- **Automated Deployment**: Terraform apply and Ansible execution
-- **Status Monitoring**: Deployment progress tracking
-
-## Deployment Flow
-
-1. **Configuration**: User edits configuration files (with Cursor's help)
-2. **Commit**: Changes committed to git repository
-3. **Validation**: GitHub Actions validates configuration
-4. **Planning**: Terraform generates deployment plan
-5. **Provisioning**: Terraform creates Proxmox infrastructure
-6. **Configuration**: Ansible configures services and applications
-7. **Verification**: Deployment status and health checks
-
-## Resource Requirements
-
-- **Minimum**: 2 CPU cores, 4GB RAM, 20GB storage
-- **Recommended**: 4 CPU cores, 8GB RAM, 50GB storage
-- **Production**: 8+ CPU cores, 16GB+ RAM, 100GB+ storage
-
-## Getting Help
-
-**Ask Cursor to explain:**
-- "How does the GitOps workflow work?"
-- "What resources do I need?"
-- "How is the deployment process structured?"
-- "What are the security features?"
-EOF
-
-    print_success "Documentation created ✓"
-}
-
-# Main setup function
+# Main execution
 main() {
-    echo "🚀 AI Infrastructure Platform Setup - GitOps Edition"
-    echo "===================================================="
+    print_banner
+    
+    print_status "🚀 Welcome to LumaDeploy AI Service Builder Setup!"
     echo ""
-    echo "💡 This setup is designed to work with Cursor's AI assistance"
-    echo "   Cursor will guide you through the process and help with any issues"
-    echo ""
-    echo "🏗️  This version uses GitOps principles:"
-    echo "   - Configuration committed to git"
-    echo "   - GitHub Actions trigger deployment"
-    echo "   - Full audit trail of changes"
+    print_cursor_tip "This setup will help you configure your AI infrastructure. Ask Cursor for help anytime!"
     echo ""
     
-    # Check prerequisites
+    check_directory
     check_prerequisites
-    
-    # Install dependencies
-    install_dependencies
-    
-    echo ""
-    print_status "Starting interactive configuration..."
-    print_cursor_tip "Cursor will help you with each configuration step"
-    echo ""
-    
-    # Get Proxmox configuration
-    echo "🔧 Proxmox Configuration"
-    echo "========================"
-    
-    PROXMOX_HOST=$(get_input "Enter Proxmox host IP address" "" "validate_ip" "PROXMOX_HOST" "Ask Cursor: 'What IP address should I use for my Proxmox host?'")
-    PROXMOX_USER=$(get_input "Enter Proxmox username" "root@pam" "" "PROXMOX_USER" "Ask Cursor: 'What username should I use for Proxmox authentication?'")
-    PROXMOX_PASS=$(get_input "Enter Proxmox password" "" "" "PROXMOX_PASS" "Ask Cursor: 'Where can I find my Proxmox password?'")
-    PROXMOX_NODE=$(get_input "Enter Proxmox node name" "pve" "" "PROXMOX_NODE" "Ask Cursor: 'How do I find my Proxmox node name?'")
-    
-    echo ""
-    echo "🌐 Network Configuration"
-    echo "========================"
-    
-    NETWORK_GATEWAY=$(get_input "Enter network gateway IP" "192.168.1.1" "validate_ip" "NETWORK_GATEWAY" "Ask Cursor: 'How do I find my network gateway IP address?'")
-    NETWORK_SUBNET=$(get_input "Enter network subnet (CIDR)" "192.168.1.0/24" "validate_subnet" "NETWORK_SUBNET" "Ask Cursor: 'What subnet should I use for my network configuration?'")
-    DNS_SERVERS=$(get_input "Enter DNS servers (comma-separated)" "8.8.8.8,8.8.4.4" "" "DNS_SERVERS" "Ask Cursor: 'What DNS servers should I use? Can I use Google's 8.8.8.8?'")
-    
-    echo ""
-    echo "⚙️  Resource Configuration"
-    echo "=========================="
-    
-    CONTAINER_CPU_LIMIT=$(get_input "Enter CPU limit per container" "2" "" "CONTAINER_CPU_LIMIT" "Ask Cursor: 'How many CPU cores should each container have?'")
-    CONTAINER_MEMORY_LIMIT=$(get_input "Enter memory limit per container (MB)" "4096" "" "CONTAINER_MEMORY_LIMIT" "Ask Cursor: 'How much memory should each container have?'")
-    CONTAINER_STORAGE_LIMIT=$(get_input "Enter storage limit per container (GB)" "20" "" "CONTAINER_STORAGE_LIMIT" "Ask Cursor: 'How much storage should each container have?'")
-    STORAGE_POOL=$(get_input "Enter Proxmox storage pool name" "local-lvm" "" "STORAGE_POOL" "Ask Cursor: 'What storage pool should I use on Proxmox?'")
-    
-    echo ""
-    echo "🏷️  Container Configuration"
-    echo "==========================="
-    
-    LIBRECHAT_CONTAINER_NAME=$(get_input "Enter LibreChat container name" "librechat" "" "LIBRECHAT_CONTAINER_NAME" "Ask Cursor: 'What should I name the LibreChat container?'")
-    MCP_SERVER_CONTAINER_NAME=$(get_input "Enter MCP server container name" "mcp-server" "" "MCP_SERVER_CONTAINER_NAME" "Ask Cursor: 'What should I name the MCP server container?'")
-    
-    echo ""
-    echo "☁️  Cloudflare Configuration (Optional)"
-    echo "======================================"
-    echo "You can skip this section and configure later if needed."
-    
-    USE_CLOUDFLARE=$(get_input "Use Cloudflare tunnel? (y/n)" "n" "" "USE_CLOUDFLARE" "Ask Cursor: 'What is Cloudflare tunnel and do I need it?'")
-    
-    if [[ "$USE_CLOUDFLARE" =~ ^[Yy]$ ]]; then
-        CLOUDFLARE_API_TOKEN=$(get_input "Enter Cloudflare API token" "" "" "CLOUDFLARE_API_TOKEN" "Ask Cursor: 'How do I create a Cloudflare API token?'")
-        CLOUDFLARE_ZONE_ID=$(get_input "Enter Cloudflare zone ID" "" "" "CLOUDFLARE_ZONE_ID" "Ask Cursor: 'Where can I find my Cloudflare zone ID?'")
-        CLOUDFLARE_ACCOUNT_ID=$(get_input "Enter Cloudflare account ID" "" "" "CLOUDFLARE_ACCOUNT_ID" "Ask Cursor: 'How do I find my Cloudflare account ID?'")
-    else
-        CLOUDFLARE_API_TOKEN=""
-        CLOUDFLARE_ZONE_ID=""
-        CLOUDFLARE_ACCOUNT_ID=""
-    fi
-    
-    echo ""
-    print_status "Creating configuration files..."
-    
-    # Create all necessary files
-    create_terraform_vars
-    create_ansible_vars
-    create_env_file
+    setup_python_env
+    setup_security
+    interactive_config
     create_makefile
-    create_requirements
-    create_main_py
-    create_docs
-    
-    echo ""
-    print_success "Setup completed successfully! 🎉"
-    echo ""
-    echo "💡 Next steps with Cursor:"
-    echo "1. Ask Cursor to review your configuration"
-    echo "2. Ask Cursor to help you commit and push:"
-    echo "   git add infrastructure/config/"
-    echo "   git commit -m 'Initial AI infrastructure configuration'"
-    echo "   git push origin main"
-    echo "3. Ask Cursor to monitor the GitHub Actions deployment"
-    echo ""
-    echo "🔧 Available commands:"
-    echo "  make help          - Show all available commands"
-    echo "  make plan          - Plan Terraform deployment"
-    echo "  make validate      - Validate configuration"
-    echo "  make deploy        - Deploy via GitOps (commit & push)"
-    echo ""
-    echo "💬 Need help? Ask Cursor:"
-    echo "  'Help me understand the GitOps workflow'"
-    echo "  'Help me commit and push my configuration'"
-    echo "  'Help me monitor the deployment'"
-    echo ""
-    echo "🚀 GitOps Workflow: Edit config → Commit → Push → Auto-deploy"
-    echo "Happy deploying with Cursor and GitOps! 🎉"
+    show_next_steps
 }
 
 # Run main function

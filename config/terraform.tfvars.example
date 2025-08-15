@@ -1,0 +1,54 @@
+# LumaDeploy AI Service Builder - Terraform Configuration
+# Copy this file to terraform.tfvars and customize for your environment
+
+# Proxmox Connection
+proxmox_host     = "your-proxmox-host.local"  # Your Proxmox server IP or hostname
+proxmox_port     = 8006                       # Proxmox web interface port
+proxmox_node     = "pve01"                    # Your Proxmox node name
+proxmox_user     = "root@pam!your-token-id"   # API token ID
+proxmox_password = "your-secret-here"         # API token secret
+
+# Network Configuration
+network_gateway = "192.168.1.1"              # Your network gateway
+network_subnet  = "192.168.1.0/24"           # Your network subnet
+dns_servers     = ["8.8.8.8", "8.8.4.4"]    # DNS servers
+
+# Storage Configuration
+storage_pool = "local-lvm"                    # Proxmox storage pool name
+
+# K3s Cluster Configuration
+k3s_master_vm_name    = "k3s-master"         # K3s master VM name
+k3s_master_cpu_cores  = 2                    # CPU cores for master
+k3s_master_memory_mb  = 4096                 # Memory for master (MB)
+k3s_master_disk_gb    = 30                   # Disk size for master (GB)
+
+k3s_worker_count      = 2                    # Number of worker nodes
+k3s_worker_vm_name    = "k3s-worker"         # Base name for workers
+k3s_worker_cpu_cores  = 4                    # CPU cores per worker
+k3s_worker_memory_mb  = 8192                 # Memory per worker (MB)
+k3s_worker_disk_gb    = 50                   # Disk size per worker (GB)
+
+# HAProxy Load Balancer
+haproxy_lb_container_name = "haproxy-lb"     # HAProxy container name
+haproxy_lb_cpu_cores      = 1               # HAProxy CPU cores
+haproxy_lb_memory_mb      = 2048             # HAProxy memory (MB)
+haproxy_lb_disk_gb        = 10               # HAProxy disk (GB)
+
+# VM Authentication
+vm_username       = "ubuntu"                 # VM username
+vm_password       = "your-secure-password"   # VM password
+vm_ssh_public_key = "ssh-rsa AAAAB3Nz..."    # Your SSH public key
+
+# IP Address Allocation (offsets from network base)
+k3s_master_ip_offset   = 20                  # Master will get .20
+k3s_worker_ip_offset   = 21                  # Workers will get .21, .22, etc.
+haproxy_lb_ip_offset   = 19                  # HAProxy will get .19
+
+# AI Services Configuration
+ollama_enabled    = true                     # Deploy Ollama for local LLMs
+librechat_enabled = true                     # Deploy LibreChat web interface
+mcp_server_count  = 5                       # Number of MCP servers to deploy
+
+# Resource Limits
+total_cpu_limit    = 16                      # Total CPU cores available
+total_memory_limit = 32768                   # Total memory available (MB)
