@@ -107,7 +107,7 @@ jobs:
           for file in kubernetes/*.yaml; do
             if [ -f "$file" ]; then
               echo "Checking $file..."
-              python -c "import yaml; yaml.safe_load(open('$file'))" || {
+              python -c "import yaml; list(yaml.safe_load_all(open('$file')))" || {
                 echo "❌ Invalid YAML in $file"
                 exit 1
               }
