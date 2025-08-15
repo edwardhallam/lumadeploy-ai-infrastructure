@@ -314,6 +314,17 @@ main() {
     print_status "💡 Run with --wait to wait for running workflows to finish"
     print_status "💡 Run with --smart-wait to detect startup and monitor to completion"
     print_status "💡 Add to git hooks with: ln -s ../../scripts/check-github-actions.sh .git/hooks/post-push"
+    
+    # Auto-prioritize failures if they exist
+    if [ "$FAILED" = true ]; then
+        echo ""
+        print_status "🚨 Auto-prioritizing GitHub Actions failures..."
+        if [ -f "./scripts/auto-prioritize-failures.sh" ]; then
+            ./scripts/auto-prioritize-failures.sh || true
+        else
+            print_warning "Auto-prioritize script not found, skipping automatic prioritization"
+        fi
+    fi
 }
 
 # Run main function with all arguments

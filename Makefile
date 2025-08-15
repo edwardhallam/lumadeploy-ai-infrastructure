@@ -27,11 +27,13 @@ help:
 	@echo "    make docs       - Generate/update documentation"
 	@echo ""
 	@echo "  🔍 GitHub Actions:"
-	@echo "    make check-actions       - Check GitHub Actions status"
-	@echo "    make check-actions-wait  - Check status and wait for completion"
-	@echo "    make check-actions-smart - Smart monitoring (detect + wait)"
-	@echo "    make push-and-check      - Push to GitHub and smart monitor"
-	@echo "    make setup-hooks         - Setup automatic Actions checking"
+	@echo "    make check-actions           - Check GitHub Actions status"
+	@echo "    make check-actions-wait      - Check status and wait for completion"
+	@echo "    make check-actions-smart     - Smart monitoring (detect + wait)"
+	@echo "    make push-and-check          - Push to GitHub and smart monitor"
+	@echo "    make push-and-prioritize     - Push and auto-prioritize failures"
+	@echo "    make auto-prioritize-failures - Auto-prioritize existing failures"
+	@echo "    make setup-hooks             - Setup automatic Actions checking"
 	@echo ""
 	@echo "  🧹 Maintenance:"
 	@echo "    make destroy    - Destroy infrastructure (with confirmation)"
@@ -207,7 +209,7 @@ clean:
 	@echo "✅ Cleanup complete"
 
 # Utility targets
-.PHONY: ssh-master ssh-worker1 ssh-worker2 kubeconfig check-actions check-actions-wait check-actions-smart push-and-check setup-hooks
+.PHONY: ssh-master ssh-worker1 ssh-worker2 kubeconfig check-actions check-actions-wait check-actions-smart push-and-check push-and-prioritize auto-prioritize-failures setup-hooks
 ssh-master:
 	@echo "🔗 Connecting to K3s master node..."
 	@MASTER_IP=$$(cd terraform && terraform output -raw k3s_master_ip 2>/dev/null); \
@@ -276,6 +278,16 @@ push-and-check:
 	@git push origin main
 	@echo ""
 	@./scripts/check-github-actions.sh --smart-wait
+
+push-and-prioritize:
+	@echo "🚀 Pushing to GitHub and auto-prioritizing failures..."
+	@git push origin main
+	@echo ""
+	@./scripts/check-github-actions.sh --smart-wait || echo "⚠️  Failures detected and prioritized"
+
+auto-prioritize-failures:
+	@echo "🚨 Auto-prioritizing GitHub Actions failures..."
+	@./scripts/auto-prioritize-failures.sh
 
 # Git hooks setup
 setup-hooks:
