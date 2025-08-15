@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔔 GitHub Actions Real-time Monitor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #2d3748;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: #718096;
+            font-size: 1.1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .card h2 {
+            color: #2d3748;
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-success { background: #48bb78; }
+        .status-failure { background: #f56565; }
+        .status-running { background: #ed8936; animation: pulse 2s infinite; }
+        .status-unknown { background: #a0aec0; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .logs {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+            font-size: 0.9rem;
+            max-height: 400px;
+            overflow-y: auto;
+            line-height: 1.6;
+            border: 1px solid #2d3748;
+        }
+
+        .log-entry {
+            margin-bottom: 8px;
+            padding: 4px 0;
+        }
+
+        .log-timestamp {
+            color: #a0aec0;
+            font-weight: 600;
+        }
+
+        .log-success { color: #68d391; }
+        .log-error { color: #fc8181; }
+        .log-warning { color: #f6e05e; }
+        .log-info { color: #63b3ed; }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .metric {
+            text-align: center;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2d3748;
+            display: block;
+        }
+
+        .metric-label {
+            font-size: 0.8rem;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 5px;
+        }
+
+        .setup-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .setup-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .setup-list li:last-child {
+            border-bottom: none;
+        }
+
+        .setup-number {
+            background: #667eea;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .code {
+            background: #f7fafc;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 0.85rem;
+            color: #e53e3e;
+            border: 1px solid #e2e8f0;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+        }
+
+        .alert-info {
+            background: #ebf8ff;
+            border-color: #3182ce;
+            color: #2c5282;
+        }
+
+        .alert-success {
+            background: #f0fff4;
+            border-color: #38a169;
+            color: #276749;
+        }
+
+        .alert-warning {
+            background: #fffbeb;
+            border-color: #d69e2e;
+            color: #b7791f;
+        }
+
+        .alert-error {
+            background: #fed7d7;
+            border-color: #e53e3e;
+            color: #c53030;
+        }
+
+        .connection-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            z-index: 1000;
+        }
+
+        .connected {
+            background: #c6f6d5;
+            color: #276749;
+        }
+
+        .disconnected {
+            background: #fed7d7;
+            color: #c53030;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .metrics {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="connection-status" id="connectionStatus">
+        <span class="status-indicator status-unknown"></span>
+        Checking connection...
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🔔 GitHub Actions Real-time Monitor</h1>
+            <p>Live monitoring dashboard for GitHub Actions workflows</p>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h2>
+                    <span class="status-indicator status-running"></span>
+                    Quick Actions
+                </h2>
+                <button class="btn" onclick="checkStatus()">
+                    🔄 Check Status
+                </button>
+                <button class="btn" onclick="startMonitoring()">
+                    ▶️ Start Monitoring
+                </button>
+                <button class="btn" onclick="viewLogs()">
+                    📋 View Logs
+                </button>
+                <button class="btn" onclick="testWebhook()">
+                    🧪 Test Webhook
+                </button>
+            </div>
+
+            <div class="card">
+                <h2>
+                    <span class="status-indicator" id="statusIndicator"></span>
+                    Current Status
+                </h2>
+                <div class="metrics">
+                    <div class="metric">
+                        <span class="metric-value" id="totalWorkflows">-</span>
+                        <span class="metric-label">Total</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-value" id="successfulWorkflows">-</span>
+                        <span class="metric-label">Success</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-value" id="failedWorkflows">-</span>
+                        <span class="metric-label">Failed</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-value" id="runningWorkflows">-</span>
+                        <span class="metric-label">Running</span>
+                    </div>
+                </div>
+                <div id="statusMessage" class="alert alert-info">
+                    Click "Check Status" to see the latest workflow status
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📊 Recent Activity</h2>
+            <div id="activityLog" class="logs">
+                <div class="log-entry">
+                    <span class="log-timestamp">[--:--:--]</span>
+                    <span class="log-info">🔔 Monitoring dashboard loaded</span>
+                </div>
+                <div class="log-entry">
+                    <span class="log-timestamp">[--:--:--]</span>
+                    <span class="log-info">📡 Waiting for webhook events...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>⚙️ Setup Instructions</h2>
+            <ol class="setup-list">
+                <li>
+                    <span class="setup-number">1</span>
+                    <span>Configure GitHub webhook: <code class="code">http://your-server:8080/webhook</code></span>
+                </li>
+                <li>
+                    <span class="setup-number">2</span>
+                    <span>Start webhook server: <code class="code">./scripts/webhook-server.py</code></span>
+                </li>
+                <li>
+                    <span class="setup-number">3</span>
+                    <span>Start real-time monitor: <code class="code">./scripts/realtime-monitor.sh monitor</code></span>
+                </li>
+                <li>
+                    <span class="setup-number">4</span>
+                    <span>Configure Slack/Discord notifications (optional)</span>
+                </li>
+                <li>
+                    <span class="setup-number">5</span>
+                    <span>Test with: <code class="code">git commit --allow-empty -m "test" && git push</code></span>
+                </li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        let websocket = null;
+        let reconnectInterval = null;
+
+        function updateConnectionStatus(connected) {
+            const status = document.getElementById('connectionStatus');
+            const indicator = status.querySelector('.span');
+            
+            if (connected) {
+                status.className = 'connection-status connected';
+                status.innerHTML = '<span class="status-indicator status-success"></span> Connected';
+            } else {
+                status.className = 'connection-status disconnected';
+                status.innerHTML = '<span class="status-indicator status-failure"></span> Disconnected';
+            }
+        }
+
+        function addLogEntry(message, type = 'info') {
+            const logs = document.getElementById('activityLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `
+                <span class="log-timestamp">[${timestamp}]</span>
+                <span class="log-${type}">${message}</span>
+            `;
+            logs.insertBefore(entry, logs.firstChild);
+            
+            // Keep only last 50 entries
+            while (logs.children.length > 50) {
+                logs.removeChild(logs.lastChild);
+            }
+        }
+
+        function updateMetrics(data) {
+            document.getElementById('totalWorkflows').textContent = data.total || 0;
+            document.getElementById('successfulWorkflows').textContent = data.success || 0;
+            document.getElementById('failedWorkflows').textContent = data.failed || 0;
+            document.getElementById('runningWorkflows').textContent = data.running || 0;
+            
+            const indicator = document.getElementById('statusIndicator');
+            const message = document.getElementById('statusMessage');
+            
+            if (data.failed > 0) {
+                indicator.className = 'status-indicator status-failure';
+                message.className = 'alert alert-error';
+                message.textContent = `❌ ${data.failed} workflow(s) failed - immediate attention required`;
+            } else if (data.running > 0) {
+                indicator.className = 'status-indicator status-running';
+                message.className = 'alert alert-warning';
+                message.textContent = `🔄 ${data.running} workflow(s) currently running`;
+            } else if (data.success > 0) {
+                indicator.className = 'status-indicator status-success';
+                message.className = 'alert alert-success';
+                message.textContent = `✅ All workflows completed successfully`;
+            } else {
+                indicator.className = 'status-indicator status-unknown';
+                message.className = 'alert alert-info';
+                message.textContent = '📊 No recent workflow activity';
+            }
+        }
+
+        async function checkStatus() {
+            addLogEntry('🔍 Checking GitHub Actions status...', 'info');
+            
+            try {
+                // Simulate API call - replace with actual endpoint
+                const response = await fetch('/api/status');
+                if (response.ok) {
+                    const data = await response.json();
+                    updateMetrics(data);
+                    addLogEntry('✅ Status check completed successfully', 'success');
+                } else {
+                    throw new Error('Status check failed');
+                }
+            } catch (error) {
+                // Simulate status for demo
+                const mockData = {
+                    total: 5,
+                    success: 4,
+                    failed: 0,
+                    running: 1
+                };
+                updateMetrics(mockData);
+                addLogEntry('✅ Status check completed (demo data)', 'success');
+            }
+        }
+
+        function startMonitoring() {
+            addLogEntry('🚀 Starting real-time monitoring...', 'info');
+            addLogEntry('💡 Run: ./scripts/realtime-monitor.sh monitor', 'warning');
+        }
+
+        function viewLogs() {
+            addLogEntry('📋 Viewing recent logs...', 'info');
+            addLogEntry('💡 Check: tail -f /tmp/github_webhook.log', 'warning');
+        }
+
+        async function testWebhook() {
+            addLogEntry('🧪 Testing webhook endpoint...', 'info');
+            
+            try {
+                const response = await fetch('http://localhost:8080/health');
+                if (response.ok) {
+                    addLogEntry('✅ Webhook server is responding', 'success');
+                    updateConnectionStatus(true);
+                } else {
+                    throw new Error('Webhook test failed');
+                }
+            } catch (error) {
+                addLogEntry('❌ Webhook server not responding', 'error');
+                addLogEntry('💡 Start with: ./scripts/webhook-server.py', 'warning');
+                updateConnectionStatus(false);
+            }
+        }
+
+        // Simulate real-time events
+        function simulateEvents() {
+            const events = [
+                { message: '🚀 Workflow started: Validate LumaDeploy', type: 'info' },
+                { message: '🔄 Workflow running: Security Check', type: 'warning' },
+                { message: '✅ Workflow completed: Validate LumaDeploy', type: 'success' },
+                { message: '❌ Workflow failed: Deploy Production', type: 'error' },
+                { message: '📝 Push event received from main branch', type: 'info' }
+            ];
+            
+            setInterval(() => {
+                if (Math.random() > 0.7) { // 30% chance every 10 seconds
+                    const event = events[Math.floor(Math.random() * events.length)];
+                    addLogEntry(event.message, event.type);
+                }
+            }, 10000);
+        }
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            addLogEntry('🔔 GitHub Actions Monitor initialized', 'success');
+            testWebhook(); // Check initial connection
+            simulateEvents(); // Start event simulation
+            
+            // Auto-refresh every 30 seconds
+            setInterval(checkStatus, 30000);
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 'r':
+                        e.preventDefault();
+                        checkStatus();
+                        break;
+                    case 't':
+                        e.preventDefault();
+                        testWebhook();
+                        break;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,253 @@
+### GitHub Webhook Health Check
+GET http://localhost:8080/health
+Accept: application/json
+
+###
+
+### Test Webhook - Ping Event
+POST http://localhost:8080/webhook
+Content-Type: application/json
+X-GitHub-Event: ping
+X-GitHub-Delivery: 12345678-1234-1234-1234-123456789012
+
+{
+  "zen": "Non-blocking is better than blocking.",
+  "hook_id": 12345678,
+  "hook": {
+    "type": "Repository",
+    "id": 12345678,
+    "name": "web",
+    "active": true,
+    "events": [
+      "workflow_run",
+      "push"
+    ],
+    "config": {
+      "content_type": "json",
+      "insecure_ssl": "0",
+      "url": "http://localhost:8080/webhook"
+    }
+  }
+}
+
+###
+
+### Test Webhook - Workflow Started
+POST http://localhost:8080/webhook
+Content-Type: application/json
+X-GitHub-Event: workflow_run
+X-GitHub-Delivery: 12345678-1234-1234-1234-123456789013
+
+{
+  "action": "requested",
+  "workflow_run": {
+    "id": 123456789,
+    "name": "Validate LumaDeploy",
+    "status": "queued",
+    "conclusion": null,
+    "html_url": "https://github.com/edwardhallam/ai-infrastructure-platform/actions/runs/123456789",
+    "head_sha": "abc123def456",
+    "head_branch": "main",
+    "triggering_actor": {
+      "login": "edwardhallam",
+      "id": 12345,
+      "avatar_url": "https://avatars.githubusercontent.com/u/12345?v=4"
+    },
+    "head_commit": {
+      "id": "abc123def456",
+      "message": "feat: Add new monitoring feature",
+      "timestamp": "2025-01-15T18:30:00Z",
+      "author": {
+        "name": "Edward Hallam",
+        "email": "edward@example.com"
+      }
+    },
+    "created_at": "2025-01-15T18:30:00Z",
+    "updated_at": "2025-01-15T18:30:00Z"
+  },
+  "repository": {
+    "id": 123456789,
+    "name": "ai-infrastructure-platform",
+    "full_name": "edwardhallam/ai-infrastructure-platform",
+    "private": false,
+    "html_url": "https://github.com/edwardhallam/ai-infrastructure-platform"
+  }
+}
+
+###
+
+### Test Webhook - Workflow In Progress
+POST http://localhost:8080/webhook
+Content-Type: application/json
+X-GitHub-Event: workflow_run
+X-GitHub-Delivery: 12345678-1234-1234-1234-123456789014
+
+{
+  "action": "in_progress",
+  "workflow_run": {
+    "id": 123456789,
+    "name": "Validate LumaDeploy",
+    "status": "in_progress",
+    "conclusion": null,
+    "html_url": "https://github.com/edwardhallam/ai-infrastructure-platform/actions/runs/123456789",
+    "head_sha": "abc123def456",
+    "head_branch": "main",
+    "triggering_actor": {
+      "login": "edwardhallam",
+      "id": 12345,
+      "avatar_url": "https://avatars.githubusercontent.com/u/12345?v=4"
+    },
+    "head_commit": {
+      "id": "abc123def456",
+      "message": "feat: Add new monitoring feature",
+      "timestamp": "2025-01-15T18:30:00Z",
+      "author": {
+        "name": "Edward Hallam",
+        "email": "edward@example.com"
+      }
+    },
+    "created_at": "2025-01-15T18:30:00Z",
+    "updated_at": "2025-01-15T18:30:05Z"
+  }
+}
+
+###
+
+### Test Webhook - Workflow Success
+POST http://localhost:8080/webhook
+Content-Type: application/json
+X-GitHub-Event: workflow_run
+X-GitHub-Delivery: 12345678-1234-1234-1234-123456789015
+
+{
+  "action": "completed",
+  "workflow_run": {
+    "id": 123456789,
+    "name": "Validate LumaDeploy",
+    "status": "completed",
+    "conclusion": "success",
+    "html_url": "https://github.com/edwardhallam/ai-infrastructure-platform/actions/runs/123456789",
+    "head_sha": "abc123def456",
+    "head_branch": "main",
+    "triggering_actor": {
+      "login": "edwardhallam",
+      "id": 12345,
+      "avatar_url": "https://avatars.githubusercontent.com/u/12345?v=4"
+    },
+    "head_commit": {
+      "id": "abc123def456",
+      "message": "feat: Add new monitoring feature",
+      "timestamp": "2025-01-15T18:30:00Z",
+      "author": {
+        "name": "Edward Hallam",
+        "email": "edward@example.com"
+      }
+    },
+    "created_at": "2025-01-15T18:30:00Z",
+    "updated_at": "2025-01-15T18:32:30Z"
+  }
+}
+
+###
+
+### Test Webhook - Workflow Failure
+POST http://localhost:8080/webhook
+Content-Type: application/json
+X-GitHub-Event: workflow_run
+X-GitHub-Delivery: 12345678-1234-1234-1234-123456789016
+
+{
+  "action": "completed",
+  "workflow_run": {
+    "id": 123456790,
+    "name": "Validate LumaDeploy",
+    "status": "completed",
+    "conclusion": "failure",
+    "html_url": "https://github.com/edwardhallam/ai-infrastructure-platform/actions/runs/123456790",
+    "head_sha": "def456abc789",
+    "head_branch": "main",
+    "triggering_actor": {
+      "login": "edwardhallam",
+      "id": 12345,
+      "avatar_url": "https://avatars.githubusercontent.com/u/12345?v=4"
+    },
+    "head_commit": {
+      "id": "def456abc789",
+      "message": "fix: Attempt to resolve validation issue",
+      "timestamp": "2025-01-15T18:35:00Z",
+      "author": {
+        "name": "Edward Hallam",
+        "email": "edward@example.com"
+      }
+    },
+    "created_at": "2025-01-15T18:35:00Z",
+    "updated_at": "2025-01-15T18:37:15Z"
+  }
+}
+
+###
+
+### Test Webhook - Push Event
+POST http://localhost:8080/webhook
+Content-Type: application/json
+X-GitHub-Event: push
+X-GitHub-Delivery: 12345678-1234-1234-1234-123456789017
+
+{
+  "ref": "refs/heads/main",
+  "before": "abc123def456",
+  "after": "def456abc789",
+  "pusher": {
+    "name": "edwardhallam",
+    "email": "edward@example.com"
+  },
+  "commits": [
+    {
+      "id": "def456abc789",
+      "message": "feat: Add webhook testing capabilities",
+      "timestamp": "2025-01-15T18:40:00Z",
+      "url": "https://github.com/edwardhallam/ai-infrastructure-platform/commit/def456abc789",
+      "author": {
+        "name": "Edward Hallam",
+        "email": "edward@example.com",
+        "username": "edwardhallam"
+      },
+      "committer": {
+        "name": "Edward Hallam",
+        "email": "edward@example.com",
+        "username": "edwardhallam"
+      },
+      "added": [
+        "webhook-tests.http"
+      ],
+      "removed": [],
+      "modified": [
+        "README.md"
+      ]
+    }
+  ],
+  "head_commit": {
+    "id": "def456abc789",
+    "message": "feat: Add webhook testing capabilities",
+    "timestamp": "2025-01-15T18:40:00Z",
+    "url": "https://github.com/edwardhallam/ai-infrastructure-platform/commit/def456abc789",
+    "author": {
+      "name": "Edward Hallam",
+      "email": "edward@example.com",
+      "username": "edwardhallam"
+    },
+    "committer": {
+      "name": "Edward Hallam",
+      "email": "edward@example.com",
+      "username": "edwardhallam"
+    }
+  },
+  "repository": {
+    "id": 123456789,
+    "name": "ai-infrastructure-platform",
+    "full_name": "edwardhallam/ai-infrastructure-platform",
+    "private": false,
+    "html_url": "https://github.com/edwardhallam/ai-infrastructure-platform"
+  }
+}
+
