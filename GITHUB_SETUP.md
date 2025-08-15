@@ -3,17 +3,20 @@
 ## Infrastructure projects available in both unified and individual repositories
 
 ### Repository Strategy
+
 - **Main Repository**: `infrastructure-management` (for development)
 - **Individual Repositories**: Available for specific project focus
 - **Flexible Deployment**: Choose which approach works best for your needs
 
 ### 1. Main Infrastructure Repository
+
 - **Name**: `lumadeploy-ai-infrastructure`
-- **URL**: https://github.com/edwardhallam/lumadeploy-ai-infrastructure
+- **URL**: <https://github.com/edwardhallam/lumadeploy-ai-infrastructure>
 - **Description**: LumaDeploy AI Service Builder - Centralized infrastructure management for Proxmox, K3s clusters, and AI service deployment
 - **Status**: ✅ Created, ✅ Pushed, ✅ Consolidated
 
 ### 2. Individual Project Repositories
+
 Each project is available as a separate repository:
 
 - **Proxmox Management** (`proxmox-lxc-manager`)
@@ -35,16 +38,19 @@ Each project is available as a separate repository:
 ## Security Features
 
 ### 🔒 All repositories are **PRIVATE**
+
 - No public access to your infrastructure configurations
 - API endpoints and network details are protected
 - Sensitive configuration files are secure
 
 ### 🛡️ .gitignore Protection
+
 - Excludes credentials, secrets, and sensitive files
 - Prevents accidental commit of API keys
 - Filters out temporary and system files
 
 ### 🔐 GitHub Security
+
 - Private repositories require authentication
 - Access controlled by your GitHub account
 - Can add collaborators if needed later
@@ -52,6 +58,7 @@ Each project is available as a separate repository:
 ## Next Steps
 
 ### 1. Open Repository in Cursor
+
 ```bash
 # Open the unified infrastructure workspace
 cursor infrastructure-management/
@@ -60,18 +67,22 @@ cd infrastructure-management && cursor .
 ```
 
 ### 2. Extension Discovery
+
 Cursor will now suggest relevant extensions as you work with:
+
 - **Python files** → Python extension
 - **YAML files** → YAML extension  
 - **Shell scripts** → Shell Script extension
 - **Markdown** → Markdown extension
 
 ### 3. Development Workflow
+
 - **Start with Proxmox management** - it's ready for development
 - **Use Git for version control** - all repos are set up
 - **Push changes regularly** - your work is safely backed up
 
 ## Repository URLs Summary
+
 ```
 Main Unified:    https://github.com/edwardhallam/lumadeploy-ai-infrastructure
                  (Private - contains all projects for development)
@@ -84,6 +95,7 @@ Scripts:         https://github.com/edwardhallam/infrastructure-automation
 ```
 
 **Note**: Choose your approach based on your needs:
+
 - **Unified**: For development and collaboration
 - **Individual**: For specific project focus and deployment
 

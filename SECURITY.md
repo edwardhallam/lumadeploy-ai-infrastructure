@@ -19,6 +19,7 @@ Run the automated security setup:
 ```
 
 This will:
+
 - Install git-secrets (via Homebrew on macOS, manual on Linux)
 - Install Husky and configure pre-commit hooks
 - Register AWS and custom security patterns
@@ -29,19 +30,23 @@ This will:
 Our security patterns catch:
 
 ### Proxmox Secrets
+
 - API tokens: `root@pam!token-name=uuid-secret`
 - Connection strings with credentials
 
 ### Generic Secrets
+
 - API keys: `api_key = "secret123"`
 - Passwords: `password = "secret123"`
 - Tokens: `token = "secret123"`
 
 ### Cloud Provider Keys
+
 - AWS Access Keys: `AKIA[0-9A-Z]{16}`
 - Stripe Keys: `sk_live_[0-9a-zA-Z]{99}`
 
 ### Infrastructure Secrets
+
 - SSH Private Keys
 - Database connection strings
 - Kubernetes secrets (base64)
@@ -49,6 +54,7 @@ Our security patterns catch:
 - Ansible vault passwords
 
 ### Environment Variables
+
 - Any exported variable containing SECRET, KEY, TOKEN, PASS
 
 ## ✅ Allowed Patterns (Whitelist)
@@ -69,6 +75,7 @@ secret.*example
 ## 🔧 Manual Commands
 
 ### Scan Repository
+
 ```bash
 # Scan entire repository
 git-secrets --scan -r
@@ -81,6 +88,7 @@ git-secrets --pre_commit_hook -- "$@"
 ```
 
 ### Manage Patterns
+
 ```bash
 # List all patterns
 git secrets --list
@@ -96,6 +104,7 @@ git secrets --register-aws
 ```
 
 ### NPM Scripts
+
 ```bash
 # Run security scan
 npm run security-scan
@@ -121,9 +130,11 @@ If legitimate code triggers false positives:
 
 1. **Review the detection** - ensure it's not actually sensitive
 2. **Add to allowed list** in `.husky/pre-commit`:
+
    ```bash
    git secrets --add --allowed "your-safe-pattern"
    ```
+
 3. **Or modify the pattern** to be more specific
 
 ## 🔄 Bypassing (Emergency Only)
@@ -168,16 +179,19 @@ rm test-secret.txt
 ## 🔗 Integration with Infrastructure
 
 ### Proxmox Integration
+
 - Detects API tokens in `.env` files
 - Catches hardcoded credentials in Python scripts
 - Validates Terraform variable files
 
 ### Kubernetes Integration
+
 - Scans for base64-encoded secrets
 - Detects service account tokens
 - Validates ConfigMap and Secret manifests
 
 ### Terraform Integration
+
 - Identifies sensitive variables
 - Catches provider credentials
 - Validates state file references
@@ -223,3 +237,107 @@ git push --force
 ---
 
 **Remember: Security is everyone's responsibility. When in doubt, don't commit it!** 🔒
+
+---
+
+# 🚀 Security Setup Guide
+
+## 🔒 Security Features
+
+### 1. Automated Security Checks
+
+- **GitHub Actions**: Automatically runs security validation on push/PR
+- **Pre-commit Hooks**: Can be set up locally for immediate feedback
+- **Make Targets**: Easy-to-use commands for security validation
+
+### 2. Sensitive Data Protection
+
+- **Environment Variables**: Use `.env` files for sensitive configuration
+- **GitIgnore Rules**: Prevents accidental commit of sensitive files
+- **Pattern Detection**: Scans for hardcoded credentials and API keys
+
+### 3. Configuration Security
+
+- **YAML Validation**: Ensures configuration files are properly formatted
+- **IP Address Detection**: Warns about hardcoded network addresses
+- **Documentation**: Clear examples and guidelines
+
+## 🚀 Getting Started
+
+### 1. Environment Setup
+
+```bash
+# Copy the example environment file
+cp config/env.example .env
+
+# Edit with your actual values
+nano .env
+
+# Ensure .env is in .gitignore (it should be by default)
+echo ".env" >> .gitignore
+```
+
+### 2. Run Security Checks
+
+```bash
+# Run security validation
+make security-check
+
+# Test security checks (non-failing)
+make security-check-dry-run
+
+# Validate infrastructure configurations
+make validate-configs
+```
+
+### 3. Set Up Pre-commit Hook (Optional)
+
+```bash
+# Create pre-commit hook
+cat > .git/hooks/pre-commit << 'EOF'
+#!/bin/bash
+echo "🔒 Running pre-commit security checks..."
+make security-check
+EOF
+
+# Make it executable
+chmod +x .git/hooks/pre-commit
+```
+
+## 📋 Security Checklist
+
+- [ ] Environment variables are used for sensitive data
+- [ ] `.env` files are in `.gitignore`
+- [ ] No hardcoded credentials in code
+- [ ] IP addresses are configurable via environment
+- [ ] Security checks pass locally
+- [ ] GitHub Actions security workflow is enabled
+
+## 🔍 What Gets Checked
+
+### Critical Violations (Will Fail Build)
+
+- Hardcoded passwords
+- API keys in code
+- Authentication tokens
+
+### Warnings (Will Pass But Alert)
+
+- Hardcoded IP addresses
+- Configuration that should be externalized
+
+### Files Excluded
+
+- Virtual environments (`venv/`, `node_modules/`)
+- Git directories (`.git/`)
+- Security scripts themselves
+- Cache directories
+
+## 🛠️ Customizing Security Rules
+
+Edit `scripts/security-check-simple.sh` to:
+
+- Add new patterns to detect
+- Modify severity levels
+- Exclude additional file types
+- Add custom validation logic

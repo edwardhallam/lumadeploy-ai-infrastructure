@@ -5,6 +5,7 @@ Complete guide to leveraging VS Code extensions for enhanced GitHub Actions moni
 ## 📋 **Installed Extensions**
 
 ### **Core Extensions**
+
 - ✅ **GitHub Actions** - Workflow validation and IntelliSense
 - ✅ **YAML** - Enhanced YAML editing and validation
 - ✅ **REST Client** - API testing and webhook debugging
@@ -13,6 +14,7 @@ Complete guide to leveraging VS Code extensions for enhanced GitHub Actions moni
 - ✅ **Live Server** - Real-time dashboard serving
 
 ### **Infrastructure Extensions**
+
 - ✅ **Terraform** - Infrastructure as Code support
 - ✅ **Ansible** - Automation playbook editing
 - ✅ **Kubernetes** - Container orchestration support
@@ -22,11 +24,14 @@ Complete guide to leveraging VS Code extensions for enhanced GitHub Actions moni
 ## 🎯 **What Each Extension Provides**
 
 ### **GitHub Actions Extension**
+
 **Files Enhanced:**
+
 - `.github/workflows/validate.yml`
 - `.github/workflows/notify.yml`
 
 **Features:**
+
 - ✅ Syntax highlighting and validation
 - ✅ Auto-completion for workflow steps
 - ✅ Error detection for invalid YAML
@@ -34,22 +39,28 @@ Complete guide to leveraging VS Code extensions for enhanced GitHub Actions moni
 - ✅ Workflow visualization
 
 ### **YAML Extension**
+
 **Files Enhanced:**
+
 - `kubernetes/*.yaml` - K8s manifests
 - `ansible/*.yml` - Playbooks
-- `docker-compose.yml` - Container orchestration
+- `config/docker-compose.yml` - Container orchestration
 
 **Features:**
+
 - ✅ Structure validation
 - ✅ Indentation guides
 - ✅ Folding for large blocks
 - ✅ Schema validation
 
 ### **REST Client Extension**
+
 **Files Created:**
+
 - `webhook-tests.http` - Comprehensive webhook testing
 
 **Test Scenarios:**
+
 - ✅ Health check endpoint
 - ✅ Ping event simulation
 - ✅ Workflow started events
@@ -58,23 +69,29 @@ Complete guide to leveraging VS Code extensions for enhanced GitHub Actions moni
 - ✅ Push event handling
 
 ### **Docker Extension**
+
 **Files Created:**
-- `Dockerfile` - Webhook server containerization
-- `docker-compose.yml` - Multi-service orchestration
-- `.dockerignore` - Build optimization
-- `nginx.conf` - Reverse proxy configuration
+
+- `config/Dockerfile` - Webhook server containerization
+- `config/docker-compose.yml` - Multi-service orchestration
+- `config/.dockerignore` - Build optimization
+- `config/nginx.conf` - Reverse proxy configuration
 
 **Features:**
+
 - ✅ Container management UI
 - ✅ Build and run containers
 - ✅ Image inspection
 - ✅ Log monitoring
 
 ### **Live Server Extension**
+
 **Files Enhanced:**
+
 - `monitoring/github-actions-dashboard.html`
 
 **Features:**
+
 - ✅ Real-time dashboard serving
 - ✅ Auto-refresh on changes
 - ✅ Live development experience
@@ -83,6 +100,7 @@ Complete guide to leveraging VS Code extensions for enhanced GitHub Actions moni
 ## 🔧 **VS Code Configuration**
 
 ### **Settings (`.vscode/settings.json`)**
+
 ```json
 {
   // GitHub Actions workflow validation
@@ -112,26 +130,31 @@ Complete guide to leveraging VS Code extensions for enhanced GitHub Actions moni
 ```
 
 ### **Tasks (`.vscode/tasks.json`)**
+
 Available tasks via `Cmd+Shift+P` → "Tasks: Run Task":
 
 **Monitoring Tasks:**
+
 - ✅ **Start Webhook Server** - Launch webhook endpoint
 - ✅ **Start Real-time Monitor** - Begin continuous monitoring
 - ✅ **Check GitHub Actions Status** - One-time status check
 - ✅ **Test Webhook Health** - Verify server connectivity
 
 **Infrastructure Tasks:**
+
 - ✅ **Validate Terraform** - Check infrastructure code
 - ✅ **Format Terraform** - Auto-format `.tf` files
 - ✅ **Validate Ansible Playbooks** - Check automation syntax
 - ✅ **Validate Kubernetes Manifests** - Verify K8s resources
 
 **Docker Tasks:**
+
 - ✅ **Build Docker Image** - Create webhook server image
 - ✅ **Start Docker Compose** - Launch multi-service stack
 - ✅ **Stop Docker Compose** - Shutdown services
 
 ### **Debug Configuration (`.vscode/launch.json`)**
+
 Available debug configurations:
 
 - ✅ **Debug Webhook Server** - Step through Python code
@@ -141,6 +164,7 @@ Available debug configurations:
 ## 🚀 **Quick Start Guide**
 
 ### **1. Test Webhook Server**
+
 ```bash
 # Method 1: Use VS Code Task
 Cmd+Shift+P → "Tasks: Run Task" → "Start Webhook Server"
@@ -150,6 +174,7 @@ Cmd+Shift+P → "Tasks: Run Task" → "Start Webhook Server"
 ```
 
 ### **2. Monitor GitHub Actions**
+
 ```bash
 # Method 1: Use VS Code Task
 Cmd+Shift+P → "Tasks: Run Task" → "Start Real-time Monitor"
@@ -159,6 +184,7 @@ Ctrl+` → ./scripts/realtime-monitor.sh monitor
 ```
 
 ### **3. View Dashboard**
+
 ```bash
 # Method 1: Use Live Server
 # Right-click monitoring/github-actions-dashboard.html → "Open with Live Server"
@@ -168,6 +194,7 @@ open monitoring/github-actions-dashboard.html
 ```
 
 ### **4. Test Webhooks**
+
 ```bash
 # Method 1: Use REST Client extension
 # Open webhook-tests.http and run tests
@@ -179,6 +206,7 @@ open monitoring/github-actions-dashboard.html
 ## 🧪 **Testing Workflow**
 
 ### **1. Validate Workflows**
+
 ```bash
 # Open .github/workflows/validate.yml
 # GitHub Actions extension provides:
@@ -189,6 +217,7 @@ open monitoring/github-actions-dashboard.html
 ```
 
 ### **2. Test Webhook Events**
+
 ```http
 ### Test Workflow Success
 POST http://localhost:8080/webhook
@@ -206,6 +235,7 @@ X-GitHub-Event: workflow_run
 ```
 
 ### **3. Monitor Real-time**
+
 ```bash
 # Terminal 1: Start webhook server
 ./scripts/webhook-server.py
@@ -223,6 +253,7 @@ curl -X POST http://localhost:8080/webhook \
 ## 🎨 **Dashboard Features**
 
 ### **Real-time Monitoring Dashboard**
+
 - ✅ **Live status updates** with WebSocket simulation
 - ✅ **Metrics visualization** (total, success, failed, running)
 - ✅ **Activity log** with color-coded entries
@@ -231,6 +262,7 @@ curl -X POST http://localhost:8080/webhook \
 - ✅ **Auto-refresh** every 30 seconds
 
 ### **Interactive Features**
+
 - ✅ **Connection status** indicator
 - ✅ **Keyboard shortcuts** (Ctrl+R for refresh, Ctrl+T for test)
 - ✅ **Real-time log streaming**
@@ -240,6 +272,7 @@ curl -X POST http://localhost:8080/webhook \
 ## 🐳 **Docker Integration**
 
 ### **Containerized Deployment**
+
 ```bash
 # Build and run with Docker Compose
 docker-compose up -d
@@ -251,6 +284,7 @@ docker-compose up -d
 ```
 
 ### **Production Deployment**
+
 ```bash
 # Build production image
 docker build -t github-webhook-server .
@@ -266,12 +300,14 @@ docker run -d \
 ## 🔍 **Debugging Features**
 
 ### **Python Debugging**
+
 - ✅ **Breakpoints** in webhook server code
 - ✅ **Variable inspection** during execution
 - ✅ **Step-through debugging** for complex logic
 - ✅ **Remote debugging** for containerized apps
 
 ### **Log Analysis**
+
 - ✅ **Integrated terminal** for real-time logs
 - ✅ **Log file highlighting** with syntax colors
 - ✅ **Search and filter** capabilities
@@ -280,6 +316,7 @@ docker run -d \
 ## 📊 **Productivity Enhancements**
 
 ### **Auto-completion**
+
 - ✅ **GitHub Actions** workflow syntax
 - ✅ **Terraform** resource properties
 - ✅ **Kubernetes** manifest fields
@@ -287,12 +324,14 @@ docker run -d \
 - ✅ **Docker** compose services
 
 ### **Validation**
+
 - ✅ **Real-time syntax** checking
 - ✅ **Schema validation** for YAML files
 - ✅ **Linting** for Python and shell scripts
 - ✅ **Format on save** for consistent code style
 
 ### **Git Integration**
+
 - ✅ **Enhanced blame** view with GitLens
 - ✅ **Commit history** visualization
 - ✅ **Branch comparison** tools
@@ -301,6 +340,7 @@ docker run -d \
 ## 🎯 **Best Practices**
 
 ### **Development Workflow**
+
 1. **Edit workflows** with GitHub Actions extension validation
 2. **Test webhooks** using REST Client before deployment
 3. **Monitor dashboard** with Live Server during development
@@ -308,6 +348,7 @@ docker run -d \
 5. **Validate infrastructure** with extension linting
 
 ### **Extension Usage**
+
 1. **Use tasks** instead of manual commands
 2. **Leverage auto-completion** for faster development
 3. **Enable format on save** for consistent code style
@@ -317,6 +358,7 @@ docker run -d \
 ## 🚨 **Troubleshooting**
 
 ### **Extension Issues**
+
 ```bash
 # Reload VS Code window
 Cmd+Shift+P → "Developer: Reload Window"
@@ -329,6 +371,7 @@ Cmd+Shift+P → "Extensions: Show Installed Extensions"
 ```
 
 ### **Webhook Server Issues**
+
 ```bash
 # Check if server is running
 curl http://localhost:8080/health
@@ -342,6 +385,7 @@ pkill -f webhook-server.py
 ```
 
 ### **Dashboard Issues**
+
 ```bash
 # Refresh Live Server
 # Right-click HTML file → "Stop Live Server" → "Open with Live Server"

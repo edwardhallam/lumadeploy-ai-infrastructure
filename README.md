@@ -18,6 +18,7 @@ LumaDeploy is a comprehensive AI infrastructure platform that provides:
 ## 🎯 **Quick Start with Cursor**
 
 ### **1. Clone and Setup**
+
 ```bash
 git clone https://github.com/edwardhallam/lumadeploy-ai-infrastructure.git
 cd lumadeploy-ai-infrastructure
@@ -25,11 +26,13 @@ cd lumadeploy-ai-infrastructure
 ```
 
 ### **2. Ask Cursor to Guide You**
+
 Open in Cursor IDE and ask:
 
 > **"Help me set up LumaDeploy on my Proxmox server"**
 
 Cursor will guide you through:
+
 - Hardware requirements assessment
 - Proxmox connection configuration  
 - Network and resource planning
@@ -37,6 +40,7 @@ Cursor will guide you through:
 - Deployment and monitoring setup
 
 ### **3. Deploy Your AI Infrastructure**
+
 ```bash
 # Cursor will help you run these commands
 make plan      # Preview your infrastructure
@@ -65,24 +69,28 @@ make status    # Monitor deployment progress
 ## 🚀 **Features**
 
 ### **AI Services**
+
 - **Ollama** - Local LLM hosting with GPU acceleration
 - **LibreChat** - ChatGPT-like interface for your models
 - **MCP Servers** - Model Context Protocol for AI tool integration
 - **Custom AI Services** - Easy integration of new AI tools
 
 ### **Infrastructure**
+
 - **K3s Kubernetes** - Lightweight, production-ready container orchestration
 - **HAProxy Load Balancer** - High availability and traffic distribution
 - **Persistent Storage** - Reliable data persistence with backup automation
 - **Network Security** - Firewall rules and secure communications
 
 ### **Developer Experience**
+
 - **Cursor Integration** - AI-guided setup and troubleshooting
 - **GitOps Workflow** - Professional deployment with audit trails
 - **Hot Reloading** - Fast development and testing cycles
 - **Comprehensive Docs** - Everything you need to know
 
 ### **Production Ready**
+
 - **Monitoring** - Prometheus + Grafana dashboards
 - **Logging** - Centralized log aggregation and analysis
 - **Backup** - Automated backup and disaster recovery
@@ -138,21 +146,25 @@ lumadeploy-ai-infrastructure/
 ## 🎯 **Use Cases**
 
 ### **For AI Enthusiasts**
+
 - **Personal AI Lab** - Run multiple LLMs locally with web interfaces
 - **AI Development** - Build and test AI applications with MCP integration
 - **Learning Platform** - Understand modern infrastructure and AI deployment
 
 ### **For Developers**
+
 - **AI-First Development** - Integrate AI services into your applications
 - **Microservices Architecture** - Learn Kubernetes and container orchestration
 - **Infrastructure Skills** - Master Terraform, Ansible, and GitOps
 
 ### **For Teams**
+
 - **Shared AI Infrastructure** - Team access to AI models and tools
 - **Development Environment** - Consistent, reproducible AI development setup
 - **Production Deployment** - Scale from development to production
 
 ### **For Enterprises**
+
 - **Private AI Cloud** - On-premises AI infrastructure with enterprise security
 - **Compliance Ready** - Audit trails, access control, and data governance
 - **Cost Optimization** - Efficient resource utilization and scaling
@@ -162,16 +174,19 @@ lumadeploy-ai-infrastructure/
 LumaDeploy is designed to work seamlessly with Cursor AI:
 
 ### **Setup Assistance**
+
 - **Hardware Assessment** - "Analyze my Proxmox server for AI workloads"
 - **Configuration Help** - "Help me configure my network settings"
 - **Service Selection** - "What AI services should I deploy for my use case?"
 
 ### **Deployment Guidance**
+
 - **Step-by-Step** - "Walk me through deploying LumaDeploy"
 - **Troubleshooting** - "Help me fix this deployment error"
 - **Optimization** - "How can I improve my AI service performance?"
 
 ### **Development Support**
+
 - **Custom Services** - "Help me add a new AI service to LumaDeploy"
 - **Configuration Changes** - "How do I modify the resource allocation?"
 - **Scaling Help** - "Help me scale my AI services"
@@ -195,12 +210,14 @@ LumaDeploy is designed to work seamlessly with Cursor AI:
 ## 🚀 **Getting Started**
 
 ### **Prerequisites**
+
 - **Proxmox VE** - Virtualization platform (tested on 7.0+)
 - **Cursor IDE** - AI-powered development environment
 - **Git** - Version control system
 - **16GB+ RAM** - Recommended for AI workloads (32GB+ preferred)
 
 ### **Quick Setup**
+
 1. **Clone the repository**
 2. **Run `./setup.sh`** - Interactive configuration
 3. **Ask Cursor for help** - AI-guided deployment
@@ -208,6 +225,7 @@ LumaDeploy is designed to work seamlessly with Cursor AI:
 5. **Access your AI services** - Web interfaces ready!
 
 ### **Example Cursor Prompts**
+
 ```
 "Help me set up LumaDeploy on my Proxmox server"
 "What hardware do I need for running local LLMs?"
