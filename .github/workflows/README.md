@@ -10,7 +10,7 @@ The `deploy.yml` workflow is **disabled** in this repository because:
 
 ## Workflow Status
 
-- ✅ **Security Check Workflow** - Active for code quality and security
+- ✅ **Security Protection** - git-secrets and Husky pre-commit hooks provide comprehensive security
 - ❌ **Deploy Workflow** - Disabled (renamed to `deploy.yml.disabled`)
 
 ## For End-Users
