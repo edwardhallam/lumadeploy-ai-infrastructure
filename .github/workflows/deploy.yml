@@ -1,4 +1,4 @@
-name: Deploy AI Infrastructure
+name: LumaDeploy AI Service Builder
 
 on:
   # Only run on manual trigger or when someone explicitly wants to deploy
@@ -7,13 +7,13 @@ on:
       action:
         description: 'Action to perform'
         required: true
-        default: 'deploy'
+        default: 'validate-only'
         type: choice
         options:
+        - validate-only
+        - plan
         - deploy
         - destroy
-        - plan
-        - validate-only
 
 env:
   TF_VERSION: '1.7.0'
@@ -28,13 +28,13 @@ jobs:
         
       - name: Check for required configuration
         run: |
-          if [ ! -f "infrastructure/config/terraform.tfvars" ]; then
-            echo "❌ Required configuration file not found: infrastructure/config/terraform.tfvars"
+          if [ "${{ github.event.inputs.action }}" != "validate-only" ] && [ ! -f "config/terraform.tfvars" ]; then
+            echo "❌ Required configuration file not found: config/terraform.tfvars"
             echo "💡 Please run setup.sh first to generate your configuration files"
             echo "💡 Or use the 'validate-only' action to check syntax without deployment"
             exit 1
           fi
-          echo "✅ Configuration files found, proceeding with validation"
+          echo "✅ Configuration check passed"
         
       - name: Validate Terraform configuration
         uses: hashicorp/setup-terraform@v3
@@ -43,18 +43,20 @@ jobs:
           
       - name: Terraform Format Check
         run: |
-          cd infrastructure/terraform
+          cd terraform
           terraform fmt -check
           
       - name: Terraform Validate
         run: |
-          cd infrastructure/terraform
-          terraform init
+          cd terraform
+          terraform init -backend=false
           terraform validate
           
       - name: Validate Ansible playbooks
         run: |
-          cd infrastructure/ansible
+          sudo apt-get update
+          sudo apt-get install -y ansible
+          cd ansible
           ansible-playbook --version
           ansible-playbook --syntax-check site.yml
 
@@ -72,18 +74,20 @@ jobs:
           
       - name: Terraform Format Check
         run: |
-          cd infrastructure/terraform
+          cd terraform
           terraform fmt -check
           
       - name: Terraform Validate (syntax only)
         run: |
-          cd infrastructure/terraform
-          terraform init
+          cd terraform
+          terraform init -backend=false
           terraform validate
           
       - name: Validate Ansible playbooks (syntax only)
         run: |
-          cd infrastructure/ansible
+          sudo apt-get update
+          sudo apt-get install -y ansible
+          cd ansible
           ansible-playbook --version
           ansible-playbook --syntax-check site.yml
           
@@ -98,10 +102,10 @@ jobs:
     if: github.event.inputs.action == 'plan'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
           
@@ -114,12 +118,12 @@ jobs:
           
       - name: Terraform Init
         run: |
-          cd infrastructure/terraform
+          cd terraform
           terraform init
           
       - name: Terraform Plan
         run: |
-          cd infrastructure/terraform
+          cd terraform
           terraform plan \
             -var="proxmox_host=${{ env.proxmox_host }}" \
             -var="proxmox_user=${{ env.proxmox_user }}" \
@@ -132,7 +136,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: terraform-plan
-          path: infrastructure/terraform/tfplan
+          path: terraform/tfplan
 
   deploy:
     needs: [validate, plan]
@@ -146,10 +150,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: terraform-plan
-          path: infrastructure/terraform
+          path: terraform
           
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
           
@@ -157,12 +161,12 @@ jobs:
         run: |
           echo "proxmox_host=${{ secrets.PROXMOX_HOST }}" >> $GITHUB_ENV
           echo "proxmox_user=${{ secrets.PROXMOX_USER }}" >> $GITHUB_ENV
-          echo "proxmox_password=${{ env.PROXMOX_PASSWORD }}" >> $GITHUB_ENV
+          echo "proxmox_password=${{ secrets.PROXMOX_PASSWORD }}" >> $GITHUB_ENV
           echo "proxmox_node=${{ secrets.PROXMOX_NODE }}" >> $GITHUB_ENV
           
       - name: Terraform Apply
         run: |
-          cd infrastructure/terraform
+          cd terraform
           terraform apply tfplan
           
       - name: Setup Ansible
@@ -181,17 +185,17 @@ jobs:
           
       - name: Run Ansible Playbooks
         run: |
-          cd infrastructure/ansible
+          cd ansible
           ansible-playbook -i inventory/inventory.py site.yml \
             -e @../config/ansible-vars.yml \
             --extra-vars "ansible_ssh_private_key_file=~/.ssh/id_rsa"
             
       - name: Deployment Summary
         run: |
-          echo "🚀 AI Infrastructure deployment completed!"
+          echo "🚀 LumaDeploy AI Infrastructure deployment completed!"
           echo "📊 Infrastructure summary:"
-          cd infrastructure/terraform
-          terraform output infrastructure_summary
+          cd terraform
+          terraform output || echo "No outputs available"
 
   destroy:
     needs: validate
@@ -202,7 +206,7 @@ jobs:
         uses: actions/checkout@v5
         
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
           
@@ -215,12 +219,12 @@ jobs:
           
       - name: Terraform Init
         run: |
-          cd infrastructure/terraform
+          cd terraform
           terraform init
           
       - name: Terraform Destroy
         run: |
-          cd infrastructure/terraform
+          cd terraform
           terraform destroy \
             -var="proxmox_host=${{ env.proxmox_host }}" \
             -var="proxmox_user=${{ env.proxmox_user }}" \
