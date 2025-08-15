@@ -96,10 +96,10 @@ output "deployment_summary" {
   description = "Summary of deployed infrastructure"
   value = {
     nodes = {
-      master   = "k3s-master (${cidrhost(var.network_subnet, 20)}) - ${var.k3s_master_cpu} cores, ${var.k3s_master_memory}MB"
-      worker1  = "k3s-worker1 (${cidrhost(var.network_subnet, 21)}) - ${var.k3s_worker_cpu} cores, ${var.k3s_worker_memory}MB"
-      worker2  = "k3s-worker2 (${cidrhost(var.network_subnet, 22)}) - ${var.k3s_worker_cpu} cores, ${var.k3s_worker_memory}MB"
-      lb       = "k3s-lb (${cidrhost(var.network_subnet, 15)}) - ${var.k3s_lb_cpu} cores, ${var.k3s_lb_memory}MB"
+      master  = "k3s-master (${cidrhost(var.network_subnet, 20)}) - ${var.k3s_master_cpu} cores, ${var.k3s_master_memory}MB"
+      worker1 = "k3s-worker1 (${cidrhost(var.network_subnet, 21)}) - ${var.k3s_worker_cpu} cores, ${var.k3s_worker_memory}MB"
+      worker2 = "k3s-worker2 (${cidrhost(var.network_subnet, 22)}) - ${var.k3s_worker_cpu} cores, ${var.k3s_worker_memory}MB"
+      lb      = "k3s-lb (${cidrhost(var.network_subnet, 15)}) - ${var.k3s_lb_cpu} cores, ${var.k3s_lb_memory}MB"
     }
     services = {
       librechat_enabled = var.librechat_enabled
