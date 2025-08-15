@@ -56,7 +56,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y ansible
-          cd ansible
+          cd infrastructure/ansible
           ansible-playbook --version
           ansible-playbook --syntax-check site.yml
 
@@ -87,7 +87,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y ansible
-          cd ansible
+          cd infrastructure/ansible
           ansible-playbook --version
           ansible-playbook --syntax-check site.yml
           
@@ -185,7 +185,7 @@ jobs:
           
       - name: Run Ansible Playbooks
         run: |
-          cd ansible
+          cd infrastructure/ansible
           ansible-playbook -i inventory/inventory.py site.yml \
             -e @../config/ansible-vars.yml \
             --extra-vars "ansible_ssh_private_key_file=~/.ssh/id_rsa"
