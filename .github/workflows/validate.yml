@@ -18,8 +18,8 @@ jobs:
       run: |
         echo "🔍 Validating LumaDeploy AI Service Builder repository..."
         
-        # Check for required directories
-        required_dirs=("terraform" "ansible" "kubernetes" "scripts" "docs")
+        # Check for required directories (updated to match actual structure)
+        required_dirs=("terraform" "infrastructure" "scripts" "docs" "proxmox")
         for dir in "${required_dirs[@]}"; do
           if [ -d "$dir" ]; then
             echo "✅ Found required directory: $dir"
@@ -86,13 +86,13 @@ jobs:
         sudo apt-get install -y ansible
         
         echo "🔧 Validating Ansible playbooks..."
-        if [ -f "ansible/site-k3s.yml" ]; then
-          ansible-playbook --syntax-check ansible/site-k3s.yml
+        if [ -f "infrastructure/ansible/site-k3s.yml" ]; then
+          ansible-playbook --syntax-check infrastructure/ansible/site-k3s.yml
           echo "✅ Ansible K3s playbook syntax valid"
         fi
         
-        if [ -f "ansible/site.yml" ]; then
-          ansible-playbook --syntax-check ansible/site.yml
+        if [ -f "infrastructure/ansible/site.yml" ]; then
+          ansible-playbook --syntax-check infrastructure/ansible/site.yml
           echo "✅ Ansible main playbook syntax valid"
         fi
         
@@ -102,9 +102,9 @@ jobs:
       run: |
         echo "☸️  Validating Kubernetes manifests..."
         
-        # Check YAML syntax for Kubernetes files
-        if [ -d "kubernetes" ]; then
-          for file in kubernetes/*.yaml; do
+        # Check YAML syntax for Kubernetes files (updated path)
+        if [ -d "infrastructure/k8s" ]; then
+          for file in infrastructure/k8s/*.yaml; do
             if [ -f "$file" ]; then
               echo "Checking $file..."
               python -c "import yaml; list(yaml.safe_load_all(open('$file')))" || {
