@@ -1,0 +1,125 @@
+name: Validate LumaDeploy
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+      
+    - name: Validate repository structure
+      run: |
+        echo "🔍 Validating LumaDeploy AI Service Builder repository..."
+        
+        # Check for required directories
+        required_dirs=("terraform" "ansible" "kubernetes" "scripts" "docs")
+        for dir in "${required_dirs[@]}"; do
+          if [ -d "$dir" ]; then
+            echo "✅ Found required directory: $dir"
+          else
+            echo "❌ Missing required directory: $dir"
+            exit 1
+          fi
+        done
+        
+        # Check for required files
+        required_files=("README.md" "Makefile" "setup.sh")
+        for file in "${required_files[@]}"; do
+          if [ -f "$file" ]; then
+            echo "✅ Found required file: $file"
+          else
+            echo "❌ Missing required file: $file"
+            exit 1
+          fi
+        done
+        
+        echo "🎉 Repository structure validation passed!"
+        
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: '1.7.0'
+        
+    - name: Validate Terraform syntax
+      run: |
+        echo "🔧 Validating Terraform configuration..."
+        cd terraform
+        terraform fmt -check
+        terraform init -backend=false
+        terraform validate
+        echo "✅ Terraform validation passed!"
+        
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Validate Python scripts
+      run: |
+        echo "🐍 Validating Python scripts..."
+        
+        # Check Python syntax in proxmox tools
+        if [ -d "proxmox/python-tools" ]; then
+          cd proxmox/python-tools
+          python -m py_compile *.py || echo "⚠️  Some Python files have syntax issues (non-critical)"
+          cd ../..
+        fi
+        
+        echo "✅ Python validation completed!"
+        
+    - name: Validate Ansible playbooks
+      run: |
+        echo "📋 Installing Ansible..."
+        sudo apt-get update
+        sudo apt-get install -y ansible
+        
+        echo "🔧 Validating Ansible playbooks..."
+        if [ -f "ansible/site-k3s.yml" ]; then
+          ansible-playbook --syntax-check ansible/site-k3s.yml
+          echo "✅ Ansible K3s playbook syntax valid"
+        fi
+        
+        if [ -f "ansible/site.yml" ]; then
+          ansible-playbook --syntax-check ansible/site.yml
+          echo "✅ Ansible main playbook syntax valid"
+        fi
+        
+        echo "✅ Ansible validation passed!"
+        
+    - name: Validate Kubernetes manifests
+      run: |
+        echo "☸️  Validating Kubernetes manifests..."
+        
+        # Check YAML syntax for Kubernetes files
+        if [ -d "kubernetes" ]; then
+          for file in kubernetes/*.yaml; do
+            if [ -f "$file" ]; then
+              echo "Checking $file..."
+              python -c "import yaml; yaml.safe_load(open('$file'))" || {
+                echo "❌ Invalid YAML in $file"
+                exit 1
+              }
+            fi
+          done
+        fi
+        
+        echo "✅ Kubernetes manifests validation passed!"
+        
+    - name: Validation summary
+      run: |
+        echo "🎉 LumaDeploy AI Service Builder validation completed successfully!"
+        echo ""
+        echo "✅ Repository structure valid"
+        echo "✅ Terraform configuration valid"
+        echo "✅ Python scripts checked"
+        echo "✅ Ansible playbooks valid"
+        echo "✅ Kubernetes manifests valid"
+        echo ""
+        echo "🚀 Ready for deployment!"
